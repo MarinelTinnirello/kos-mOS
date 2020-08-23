@@ -204,6 +204,36 @@ var TSOS;
                         _StdOut.putText("Help displays a list of (hopefully) valid commands.");
                         break;
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
+                    case "ver":
+                        _StdOut.putText("Displays KOS-MOS's serial number.");
+                        break;
+                    case "shutdown":
+                        _StdOut.putText("Shuts down KOS-MOS, but her host continues to run.");
+                        break;
+                    case "cls":
+                        _StdOut.putText("Clears KOS-MOS's display terminal.");
+                        break;
+                    case "man":
+                        _StdOut.putText("Displays information about <topic>.");
+                        break;
+                    case "trace":
+                        _StdOut.putText("Sets the trace for KOS-MOS to <on | off>");
+                        break;
+                    case "rot13":
+                        _StdOut.putText("Uses a Caesar cipher shift 13 to decode a string.");
+                        break;
+                    case "prompt":
+                        _StdOut.putText("Changes the prompt to be <string>");
+                        break;
+                    case "date":
+                        _StdOut.putText("Displays the current date and time.");
+                        break;
+                    case "whereami":
+                        _StdOut.putText("Displays where you are in the U.M.N.");
+                        break;
+                    case "yeshallbeasgods":
+                        _StdOut.putText("Knowing good and evil?");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -238,6 +268,7 @@ var TSOS;
             }
         }
         shellRot13(args) {
+            // This is a Caesar cipher by 13
             if (args.length > 0) {
                 // Requires Utils.ts for rot13() function.
                 _StdOut.putText(args.join(' ') + " = '" + TSOS.Utils.rot13(args.join(' ')) + "'");
@@ -273,29 +304,27 @@ var TSOS;
             _StdOut.putText("Miltian system, Tantus arm 4th finger, Galaxy 18 - Old Miltia");
         }
         shellYeShallBeAsGods(args) {
+            // TODO:    only really doing the type writing at the end, not necessarily a speed issue
+            //          attempt to scale the amount of printouts to screen, or just guess
             var ind = 0;
-            var txt = ' Ye shall be as gods';
-            var spd = 50;
-            var times = 10;
+            var txt = ' Ye shall be as gods ';
+            var spd = 100;
+            var times = 30;
 
+            /**** Prints out txt 1 char at a time *****/
             function typeWrite() {
-                for (var i = 0; i < times; i++) {
-                    if (ind < txt.length) {
-                        document.getElementById("overlay-content").innerHTML += txt.charAt(ind);
-                        ind++;
-                        setTimeout(typeWrite, spd);
-                    }
-
-                    txt += " " + txt;
+                if (ind < txt.length) {
+                    document.getElementById("overlay-content").innerHTML += txt.charAt(ind);
+                    ind++;
+                    setTimeout(typeWrite, spd);
                 }
 
                 return txt;
             }
-            // for (var i = 0; i < 10; i++) {
-            //     console.log(txt);
-            // }
+
             document.getElementById("overlay").style.width = "100%";
-            document.getElementById("overlay-content").innerHTML = typeWrite();
+            // Be sure to use repeat() over a loop, otherwise you'll run into overflow errors
+            document.getElementById("overlay-content").innerHTML = typeWrite().repeat(times);
         }
     }
     TSOS.Shell = Shell;

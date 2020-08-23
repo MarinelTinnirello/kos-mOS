@@ -35,6 +35,8 @@ p1 {
   font-weight: normal;
   font-style: normal;
   font-size: xx-large;
+  animation: anim-text 4s steps(29, end) 1s 1 normal both,
+              anim-cursor 600ms steps(29, end) infinite;
 }
 
 #display {
@@ -71,4 +73,14 @@ p1 {
   position: relative;
   width: 100%;
   text-align: left;
+}
+
+@keyframes anim-text {
+  from { width: 0; }
+  to { width: 500px; }
+}
+
+@keyframes anim-cursor {
+  from { border-right-color: white; }
+  to { border-right-color: transparent; }
 }
