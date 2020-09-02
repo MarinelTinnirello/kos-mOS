@@ -54,11 +54,13 @@ var TSOS;
                 } else if (chr === String.fromCharCode(9)) {        // tab
                     console.log("tab pressed");
                 } else if ((chr === "up") || (chr === "down")) {    // up, down
+                    // TODO: overflow error when I'm done with scrolling
                     this.putCmdHistory(chr);
-                    console.log("gamer");
+                    console.log("cmd hit");
                 } else if (chr == "reset") {
+                    // TODO: just doesn't work
                     TSOS.Control.hostBtnReset_click(null);
-                    console.log("gamer222");
+                    console.log("reset");
                 }
                 else {
                     // This is a "normal" character, so ...
@@ -157,6 +159,7 @@ var TSOS;
         //     var buffer = "";
         //     var lineWrapStr = [];
 
+        //     /*** Change line ending position based on whatever the current character is ***/
         //     while (text.length > 0) {
         //         while ((text.length > 0) &&
         //             _DrawingContext.measureText(this.currentFont, this.currentFontSize, 
@@ -164,7 +167,8 @@ var TSOS;
         //             buffer += text.charAt(0);
         //             text = text.slice(1);
         //         }
-                
+
+        //         // push new character
         //         lineWrapStr.push(buffer);
         //         buffer = "";
         //         currWidth = _Canvas.width;
@@ -183,6 +187,7 @@ var TSOS;
             if (text !== "") {
                 // var lineWrapStr = this.lineWrap(text);
 
+                // /*** Push new text slice to next line ***/
                 // for (var i = 0; i < lineWrapStr.length; i++) {
                 //     var line = lineWrapStr[i];
 

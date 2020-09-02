@@ -61,7 +61,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - Sets the status.");
             this.commandList[this.commandList.length] = sc;
             // load
-            sc = new TSOS.ShellCommand(this.shellLoad, "load", "Loads program from User Program Input.");
+            sc = new TSOS.ShellCommand(this.shellLoad, "load", "- Loads program from User Program Input.");
             this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
@@ -332,7 +332,6 @@ var TSOS;
             }
 
             document.getElementById("overlay").style.width = "100%";
-            // Be sure to use repeat() over a loop, otherwise you'll run into overflow errors
             document.getElementById("overlay-content-p").innerHTML = typeWrite().repeat(times);
         }
         shellBSOD(args) {
@@ -377,7 +376,7 @@ var TSOS;
         }
         shellLoad(args) {
             var program = document.getElementById("taProgramInput").value.trim().toUpperCase();
-            // put extra split() here cause we need it for test()
+            // put extra split(" ") here cause we need it for test()
             var programArr = program.split(" ");
 
             /** Checks if program in text area is valid **/

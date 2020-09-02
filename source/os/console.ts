@@ -13,7 +13,9 @@ module TSOS {
                     public currentFontSize = _DefaultFontSize,
                     public currentXPosition = 0,
                     public currentYPosition = _DefaultFontSize,
-                    public buffer = "") {
+                    public buffer = "",
+                    public cmdHistory = [],
+                    public cmdInd = 0) {
         }
 
         public init(): void {
@@ -41,6 +43,18 @@ module TSOS {
                     _OsShell.handleInput(this.buffer);
                     // ... and reset our buffer.
                     this.buffer = "";
+                } else if (chr === String.fromCharCode(8)) {        // backspace
+                    this.erasePrevChar();
+                } else if (chr === String.fromCharCode(9)) {        // tab
+                    console.log("tab pressed");
+                } else if ((chr === "up") || (chr === "down")) {    // up, down
+                    // TODO: overflow error when I'm done with scrolling
+                    this.putCmdHistory(chr);
+                    console.log("cmd hit");
+                } else if (chr == "reset") {
+                    // TODO: just doesn't work
+                    TSOS.Control.hostBtnReset_click(null);
+                    console.log("reset");
                 } else {
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
@@ -81,6 +95,82 @@ module TSOS {
                                      _FontHeightMargin;
 
             // TODO: Handle scrolling. (iProject 1)
+                        //          Fix not fully scrolling back up to top
+            //          Probably a scrollbar error, not encapsulating canvas
+            /** if yPos > canvas height, capture img data, set height - 5 **/
+            if (this.currentYPosition > _Canvas.height) {
+                var imgData = _DrawingContext.getImageData(0, 20, _Canvas.width, _Canvas.height);
+
+                this.clearScreen();
+                _DrawingContext.putImageData(imgData, 0, 0);
+                this.currentYPosition = _Canvas.height - 5;
+            }
+        }
+
+        public erasePrevChar(): void {
+            if (this.buffer.length > 0) {
+                // offset of our current char via slice (new array)
+                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, 
+                                                            this.buffer.slice(-1));
+                // grabs current x - offset
+                var xPos = this.currentXPosition - offset;
+                // grabs current y++ - font size
+                var yPos = this.currentYPosition + 1 - this.currentFontSize;
+
+                _DrawingContext.clearRect(xPos, yPos, this.currentXPosition, this.currentYPosition);
+                this.currentXPosition = xPos;
+                /* use substr() over substring() because we want to specify the string length,
+                * not the end position
+                * this is cause we're doing x/y pos as vars and keeping clearRect() clean
+                */
+                this.buffer = this.buffer.substr(0, this.buffer.length - 1);
+            }
+        }
+        
+        public putCmdHistory(chr) {
+            // TODO:    fix error for when space is empty
+            if (this.cmdInd >= 0) {
+                if (chr === "up") {
+                    if (this.cmdInd++ < this.cmdHistory.length) {
+                        this.cmdInd++;
+                    } else {
+                        this.cmdInd = 0;
+                    }
+                } else if (chr === "down") {
+                    if (this.cmdInd-- < -1) {
+                        this.cmdInd--;
+                    } else {
+                        this.cmdInd = 0;
+                    }
+                }
+            }
+
+            // clear buffer, put cmd on line
+            this.clearBuffer();
+            this.buffer = this.cmdHistory[this.cmdInd];
+            this.putText(this.buffer);
+        }
+
+        public clearBuffer(): void {
+            this.currentXPosition = 0;
+
+            var bufferSize = _DrawingContext.measureText(this.currentFont, this.currentFontSize, 
+                                                        _OsShell.promptStr + this.buffer);
+            var lineCount = Math.ceil(bufferSize / _Canvas.width);
+
+            /** if line wrapped, reset yPos **/
+            if (lineCount > 1) {
+                this.currentYPosition -= (lineCount - 1) * this.bufferLineHeight();
+            }
+
+            // clear row, put cmd on screen
+            _DrawingContext.clearRect(this.currentXPosition, this.currentYPosition - _DefaultFontSize,
+                                        _Canvas.width, lineCount * this.bufferLineHeight());
+            _StdOut.putText(_OsShell.promptStr);
+        }
+
+        public bufferLineHeight() {
+            return _DefaultFontSize + _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +_FontHeightMargin;
         }
     }
  }

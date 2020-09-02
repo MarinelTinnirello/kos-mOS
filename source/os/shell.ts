@@ -106,7 +106,7 @@ module TSOS {
             // load
             sc = new ShellCommand(this.shellLoad,
                                     "load",
-                                    "Loads program from User Program Input.");
+                                    "- Loads program from User Program Input.");
             this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
@@ -391,7 +391,6 @@ module TSOS {
             }
 
             document.getElementById("overlay").style.width = "100%";
-            // Be sure to use repeat() over a loop, otherwise you'll run into overflow errors
             document.getElementById("overlay-content-p").innerHTML = typeWrite().repeat(times);
         }
 

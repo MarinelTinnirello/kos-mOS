@@ -155,6 +155,8 @@ var TSOS;
             //          Need to reset the text so it's on top.... or treat this like an image
             //          How to reset all the text in the console before??
             //          Fix for typescript
+            // TODO: I have a much cooler, CSS-based BSOD
+            //          But here's the original one for the console, if I need to keep it there
             // _Canvas.width = 500;
             // _Canvas.height = 500;
 
