@@ -150,6 +150,24 @@ var TSOS;
         krnTrapError(msg) {
             TSOS.Control.hostLog("OS ERROR - TRAP: " + msg);
             // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)
+
+            // TODO: It works
+            //          Need to reset the text so it's on top.... or treat this like an image
+            //          How to reset all the text in the console before??
+            //          Fix for typescript
+            // _Canvas.width = 500;
+            // _Canvas.height = 500;
+
+            // var cnvs = document.getElementById("display");
+            // var ctx = cnvs.getContext("2d");
+
+            // ctx.beginPath();
+            // ctx.rect(0, 0, 500, 500);
+            // ctx.fillStyle = "blue";
+            // ctx.fill();
+
+            // _StdOut.putText("you screwed it up");
+
             this.krnShutdown();
         }
     }

@@ -68,6 +68,25 @@ module TSOS {
 
             // TODO in the future: Optionally update a log database or some streaming service.
         }
+        //
+        // Host Functions
+        //
+        public static getCurrTime() {
+            var date = new Date();      // date object holds date (mm/dd/yyyy) and time
+            var day = new Array(7);     // holds days in strings
+
+            day[0] = "Sunday";
+            day[1] = "Monday";
+            day[2] = "Tuesday";
+            day[3] = "Wednesday";
+            day[4] = "Thursday";
+            day[5] = "Friday";
+            day[6] = "Saturday";
+
+            var time = day[date.getDay()] + " " + date.toLocaleDateString() + " " + date.toLocaleTimeString();
+
+            return time;
+        }
 
 
         //
@@ -83,6 +102,10 @@ module TSOS {
 
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
+
+            // .. set status and time
+            document.getElementById("Status").innerHTML = "Status:  RUNNING";
+            document.getElementById("Time").innerHTML = this.getCurrTime();
 
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
             _CPU = new Cpu();  // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
@@ -103,6 +126,7 @@ module TSOS {
             // Stop the interval that's simulating our clock pulse.
             clearInterval(_hardwareClockID);
             // TODO: Is there anything else we need to do here?
+            document.getElementById("Status").innerHTML = "Status:  HALTED";
         }
 
         public static hostBtnReset_click(btn): void {

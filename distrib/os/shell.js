@@ -54,6 +54,15 @@ var TSOS;
             // ye shall be as gods
             sc = new TSOS.ShellCommand(this.shellYeShallBeAsGods, "yeshallbeasgods", " - Knowing good and evil?");
             this.commandList[this.commandList.length] = sc;
+            // bsod
+            sc = new TSOS.ShellCommand(this.shellBSOD, "bsod", " - ERROR in KOS-MOS.");
+            this.commandList[this.commandList.length] = sc;
+            // status
+            sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - Sets the status.");
+            this.commandList[this.commandList.length] = sc;
+            // load
+            sc = new TSOS.ShellCommand(this.shellLoad, "load", "Loads program from User Program Input.");
+            this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -234,6 +243,15 @@ var TSOS;
                     case "yeshallbeasgods":
                         _StdOut.putText("Knowing good and evil?");
                         break;
+                    case "bsod":
+                        _StdOut.putText("ERROR in KOS-MOS.");
+                        break;
+                    case "status":
+                        _StdOut.putText("Sets the status to be <string>.");
+                        break;
+                    case "load":
+                        _StdOut.putText("Loads program from User Program Input.");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -286,18 +304,9 @@ var TSOS;
             }
         }
         shellDate(args) {
-            var date = new Date();      // date object holds date (mm/dd/yyyy) and time
-            var day = new Array(7);     // holds days in strings
+            var time = TSOS.Control.getCurrTime();
 
-            day[0] = "Sunday";
-            day[1] = "Monday";
-            day[2] = "Tuesday";
-            day[3] = "Wednesday";
-            day[4] = "Thursday";
-            day[5] = "Friday";
-            day[6] = "Saturday";
-
-            _StdOut.putText(day[date.getDay()] + " " + date.toLocaleDateString() + " " + date.toLocaleTimeString());
+            _StdOut.putText(time);
         }
         shellWhereAmI(args) {
             // Important area in Xenosaga
@@ -314,7 +323,7 @@ var TSOS;
             /**** Prints out txt 1 char at a time *****/
             function typeWrite() {
                 if (ind < txt.length) {
-                    document.getElementById("overlay-content").innerHTML += txt.charAt(ind);
+                    document.getElementById("overlay-content-p").innerHTML += txt.charAt(ind);
                     ind++;
                     setTimeout(typeWrite, spd);
                 }
@@ -324,7 +333,70 @@ var TSOS;
 
             document.getElementById("overlay").style.width = "100%";
             // Be sure to use repeat() over a loop, otherwise you'll run into overflow errors
-            document.getElementById("overlay-content").innerHTML = typeWrite().repeat(times);
+            document.getElementById("overlay-content-p").innerHTML = typeWrite().repeat(times);
+        }
+        shellBSOD(args) {
+            var container = document.getElementById("overlay");
+            var count = 20;
+            var txt = " 【Ｇａｍｅ　ｏｖｅｒ】 . . . ";
+
+            /*** Creates box divs ***/
+            for (var i = 0; i < count; i++) {
+                var glitchBx = document.createElement('div');
+
+                glitchBx.className = 'box';
+                container.appendChild(glitchBx);
+            }
+
+            /**** Creates random assortment of box divs every 200 ms ****/
+            setInterval(function() {
+                var glitch = document.getElementsByClassName('box');
+
+                for (var i = 0; i < glitch.length; i++) {
+                    glitch[i].style.left = Math.floor(Math.random() * 100) + 'vw';
+                    glitch[i].style.top = Math.floor(Math.random() * 100) + 'vh';
+                    glitch[i].style.width = Math.floor(Math.random() * 400) + 'px';
+                    glitch[i].style.height = Math.floor(Math.random() * 100) + 'px';
+                }
+            }, 200);
+
+            document.getElementById("overlay").style.width = "100%";
+            document.getElementById("overlay").style.backgroundColor = "blue";
+            document.getElementById("overlay-content-h").innerHTML = txt;
+
+            _Kernel.krnTrapError("You killed Kevin.");
+        }
+        shellStatus(args) {
+            if (args.length > 0) {
+                var status = args.toString();
+
+                document.getElementById("Status").innerHTML = args.join(" ");
+            } else {
+                _StdOut.putText("Usage: status <string>  Please supply a string.");
+            }
+        }
+        shellLoad(args) {
+            var program = document.getElementById("taProgramInput").value.trim().toUpperCase();
+            // put extra split() here cause we need it for test()
+            var programArr = program.split(" ");
+
+            /** Checks if program in text area is valid **/
+            if (program === "") {
+                _StdOut.putText("Invalid program.  Usage: Text area is empty.");
+            } else {
+                // trick I learned from Java
+                // regex blocks out whatever specified tokens, in this case, all non-numbers and A - F
+                var regex = /^[0-9a-f]+$/i;
+
+                /*** Cycles through parsed input to check if chars are valid ***/
+                for (var i = 0; i < programArr.length; i++) {
+                    if (regex.test(programArr[i]) === false) {
+                        _StdOut.putText("Invalid program.  Usage: Invalid hex characters.");
+                    } else {
+                        _StdOut.putText("Program is valid.");
+                    }
+                }
+            }
         }
     }
     TSOS.Shell = Shell;
