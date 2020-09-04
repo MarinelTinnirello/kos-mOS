@@ -88,7 +88,6 @@ module TSOS {
             return time;
         }
 
-
         //
         // Host Events
         //

@@ -37,7 +37,7 @@ module TSOS {
                 // Get the next character from the kernel input queue.
                 var chr = _KernelInputQueue.dequeue();
                 // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
-                if (chr === String.fromCharCode(13)) { // the Enter key
+                if (chr === String.fromCharCode(13)) { // enter
                     // The enter key marks the end of a console command, so ...
                     // ... tell the shell ...
                     _OsShell.handleInput(this.buffer);
@@ -46,9 +46,9 @@ module TSOS {
                 } else if (chr === String.fromCharCode(8)) {        // backspace
                     this.erasePrevChar();
                 } else if (chr === String.fromCharCode(9)) {        // tab
+                    this.autoComplete();
                     console.log("tab pressed");
                 } else if ((chr === "up") || (chr === "down")) {    // up, down
-                    // TODO: overflow error when I'm done with scrolling
                     this.putCmdHistory(chr);
                     console.log("cmd hit");
                 } else if (chr == "reset") {
@@ -74,13 +74,69 @@ module TSOS {
                 do the same thing, thereby encouraging confusion and decreasing readability, I
                 decided to write one function and use the term "text" to connote string or char.
             */
+           // TODO: Fix for backspace
             if (text !== "") {
-                // Draw the text at the current X and Y coordinates.
-                _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
-                // Move the current X position.
-                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-                this.currentXPosition = this.currentXPosition + offset;
+                var arr = text.split(' ');
+
+                if (arr.length > 1 && text !== ' ') {
+                    for (var i = 0; i < arr.length; i++) {
+                        this.putText(arr[i]);
+
+                        if (i !== arr.length - 1) {
+                            this.putText(' ');
+                        }
+                    }
+                } else {
+                    // Move the current X position.
+                    var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+
+                    if (this.currentXPosition + offset > _Canvas.width / window.devicePixelRatio) {
+                        this.advanceLine();
+                    }
+
+                    // Draw the text at the current X and Y coordinates.
+                    _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, 
+                                                this.currentYPosition, text);
+                    // Move the current X position.
+                    this.currentXPosition = this.currentXPosition + offset;
+                }
             }
+         }
+
+         public autoComplete(): void {
+             // the tab function is for auto completing a cmd based on whatever characters we type
+             // could also do this taking a char param, but grabbing all the commands is just easier
+             //     plus, we don't have to make a case for if there's nothing in the buffer
+             var possibleCmds = [];
+
+             /*** Look through all commands, push them into command list ***/
+             for (var i = 0; i < _OsShell.commandList.length; i++) {
+                 if (_OsShell.commandList[i].command.indexOf(this.buffer) === 0) {
+                     possibleCmds.push(_OsShell.commandList[i].command);
+                 }
+             }
+
+             /** if there's more than 1 command in the list, clear buffer and put possible cmd
+              * else, print out all possible commands on the next line
+             **/
+             if (possibleCmds.length === 1) {
+                 this.clearBuffer();
+                 this.putText(possibleCmds[0]);
+                 this.buffer = possibleCmds[0];
+             } else {
+                 this.clearBuffer();
+                 this.putText("Possible Commands:");
+
+                 for (var i = 0; i < possibleCmds.length; i++) {
+                     this.advanceLine();
+                     this.putText("  " + possibleCmds[i]);
+                 }
+
+                 this.advanceLine();
+                 // even though it's in clearBuffer(), advanceLine() takes it out
+                 // so put this in to make the transition less awkward
+                 _StdOut.putText(_OsShell.promptStr);
+             }
          }
 
         public advanceLine(): void {
@@ -95,9 +151,8 @@ module TSOS {
                                      _FontHeightMargin;
 
             // TODO: Handle scrolling. (iProject 1)
-                        //          Fix not fully scrolling back up to top
-            //          Probably a scrollbar error, not encapsulating canvas
-            /** if yPos > canvas height, capture img data, set height - 5 **/
+            // DO NOT try this with a scrollbar added
+            // it would be waaaaaaay too hard to continuously capture and recapture what we count as images
             if (this.currentYPosition > _Canvas.height) {
                 var imgData = _DrawingContext.getImageData(0, 20, _Canvas.width, _Canvas.height);
 
@@ -128,16 +183,20 @@ module TSOS {
         }
         
         public putCmdHistory(chr) {
-            // TODO:    fix error for when space is empty
+            // remember, "++" is going to add 2 indices, which might skip around a bit
+            /** if > 0,
+             * if up, check the index compared to the length and either increment or set to 0
+             * if down, check the index compared to going under -1 and either decerement or set to 0
+            **/
             if (this.cmdInd >= 0) {
                 if (chr === "up") {
-                    if (this.cmdInd++ < this.cmdHistory.length) {
+                    if (this.cmdInd + 1 < this.cmdHistory.length) {
                         this.cmdInd++;
                     } else {
                         this.cmdInd = 0;
                     }
                 } else if (chr === "down") {
-                    if (this.cmdInd-- < -1) {
+                    if (this.cmdInd - 1 < -1) {
                         this.cmdInd--;
                     } else {
                         this.cmdInd = 0;

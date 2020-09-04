@@ -372,26 +372,27 @@ module TSOS {
         }
 
         public shellYeShallBeAsGods(args: string[]) {
-            // TODO:    only really doing the type writing at the end, not necessarily a speed issue
-            //          attempt to scale the amount of printouts to screen, or just guess
-            var ind = 0;
-            var txt = ' Ye shall be as gods ';
-            var spd = 100;
-            var times = 30;
+            // For fun typewriter effect (defunct, but here for my reference)
+            // var ind = 0;
+            // var txt = ' Ye shall be as gods ';
+            // var spd = 100;
+            // var times = 30;
 
-            /**** Prints out txt 1 char at a time *****/
-            function typeWrite() {
-                if (ind < txt.length) {
-                    document.getElementById("overlay-content-p").innerHTML += txt.charAt(ind);
-                    ind++;
-                    setTimeout(typeWrite, spd);
-                }
+            // /**** Prints out txt 1 char at a time *****/
+            // function typeWrite() {
+            //     if (ind < txt.length) {
+            //         document.getElementById("overlay-content-p").innerHTML += txt.charAt(ind);
+            //         ind++;
+            //         setTimeout(typeWrite, spd);
+            //     }
 
-                return txt;
-            }
+            //     return txt;
+            // }
 
-            document.getElementById("overlay").style.width = "100%";
-            document.getElementById("overlay-content-p").innerHTML = typeWrite().repeat(times);
+            // document.getElementById("overlay").style.width = "100%";
+            // document.getElementById("overlay-content-p").innerHTML = typeWrite().repeat(times);
+
+            _StdOut.putText("Ye shall be as gods...");
         }
 
         public shellBSOD(args: string[]) {
