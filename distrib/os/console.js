@@ -80,7 +80,6 @@ var TSOS;
                 do the same thing, thereby encouraging confusion and decreasing readability, I
                 decided to write one function and use the term "text" to connote string or char.
             */
-            // TODO: Fix for backspace
             if (text !== "") {
                 var arr = text.split(' ');
 
@@ -147,6 +146,19 @@ var TSOS;
                 * this is cause we're doing x/y pos as vars and keeping clearRect() clean
                 */
                 this.buffer = this.buffer.substr(0, this.buffer.length - 1);
+
+                /** handles line wrap for backspacing **/
+                if (this.currentXPosition <= 0) {
+                    this.currentYPosition -= this.bufferLineHeight();
+
+                    // use this instead of regular xPos so that we can handle anything relating to 
+                    //      different fonts
+                    var xCursor = _DrawingContext.measureText(this.currentFont, this.currentFontSize, 
+                                                                _OsShell.promptStr + this.buffer);
+
+                    xCursor = xCursor % _Canvas.width;
+                    this.currentXPosition = xCursor;
+                }
             }
         }
         autoComplete() {
