@@ -29,6 +29,16 @@ module TSOS {
         public static hostClockPulse(): void {
             // Increment the hardware (host) clock.
             _OSclock++;
+
+            /** every second, update the display clock **/
+            if (_OSclock % 10 == 0) {
+                // set the time in the display bar here, not in Control nor in Kernel
+                // this is cause we're updating every pulse here
+                var date = new Date();
+                
+                document.getElementById("Time").innerHTML = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+            }
+
             // Call the kernel clock pulse event handler.
             _Kernel.krnOnCPUClockPulse();
         }

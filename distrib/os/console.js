@@ -212,6 +212,7 @@ var TSOS;
             this.putText(this.buffer);
         }
         clearBuffer() {
+            // For clearing the whole line 
             this.currentXPosition = 0;
 
             var bufferSize = _DrawingContext.measureText(this.currentFont, this.currentFontSize, 
@@ -229,6 +230,12 @@ var TSOS;
             _StdOut.putText(_OsShell.promptStr);
         }
         bufferLineHeight() {
+            // this was too long for me to use multiple times, so it's in it's own function
+
+            /* You found Totaka's Song!
+                4|------------------c---|-----------|-------|-------|-------|-
+                3|--c-c-d-e-d-c-g-e---g-|-g-g-G-f-D-|-d-g-c-|-------|-------|-
+            */
             return _DefaultFontSize + _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +_FontHeightMargin;
         }
     }

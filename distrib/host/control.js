@@ -85,9 +85,8 @@ var TSOS;
             document.getElementById("btnReset").disabled = false;
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
-            // ... set status and time
+            // ... set status
             document.getElementById("Status").innerHTML = "Status:  RUNNING";
-            document.getElementById("Time").innerHTML = this.getCurrTime();
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
             _CPU = new TSOS.Cpu(); // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
             _CPU.init(); //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.

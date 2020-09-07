@@ -97,3 +97,13 @@ p1 {
   from { border-right-color: white; }
   to { border-right-color: transparent; }
 }
+
+.ascii-art {
+  font-family: monospace;
+  white-space: pre;
+  text-align: center;
+  z-index: -1;
+  background-image: linear-gradient(#55cdfc, #f7a8b8, #fff, #f7a8b8, #55cdfc);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

@@ -336,6 +336,8 @@ var TSOS;
             _StdOut.putText("Ye shall be as gods...");
         }
         shellBSOD(args) {
+            // the cooler BSOD function, with CSS done in TS
+            // I could also throw it in the Kernel, but I didn't feel like it
             var container = document.getElementById("overlay");
             var count = 20;
             var txt = " 【Ｇａｍｅ　ｏｖｅｒ】 . . . ";
