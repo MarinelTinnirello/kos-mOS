@@ -196,7 +196,7 @@ module TSOS {
                         this.cmdInd = 0;
                     }
                 } else if (chr === "down") {
-                    if (this.cmdInd - 1 < -1) {
+                    if (this.cmdInd - 1 > -1) {
                         this.cmdInd--;
                     } else {
                         this.cmdInd = 0;

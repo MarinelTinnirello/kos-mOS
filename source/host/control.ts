@@ -68,6 +68,7 @@ module TSOS {
 
             // TODO in the future: Optionally update a log database or some streaming service.
         }
+        
         //
         // Host Functions
         //

@@ -80,27 +80,6 @@ var TSOS;
                 do the same thing, thereby encouraging confusion and decreasing readability, I
                 decided to write one function and use the term "text" to connote string or char.
             */
-            // if (text !== "") {
-            //     // var lineWrapStr = this.lineWrap(text);
-
-            //     // /*** Push new text slice to next line ***/
-            //     // for (var i = 0; i < lineWrapStr.length; i++) {
-            //     //     var line = lineWrapStr[i];
-
-            //         // Draw the text at the current X and Y coordinates.
-            //         _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, 
-            //                                     this.currentYPosition, text);
-
-            //         // Move the current X position.
-            //         var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-
-            //         this.currentXPosition = this.currentXPosition + offset;
-
-            //     //     if (i++ < lineWrapStr.length) {
-            //     //         this.advanceLine();
-            //     //     }
-            //     // }
-            // }
             // TODO: Fix for backspace
             if (text !== "") {
                 var arr = text.split(' ');
@@ -185,7 +164,7 @@ var TSOS;
 
             /** if there's more than 1 command in the list, clear buffer and put possible cmd
              * else, print out all possible commands on the next line
-         **/
+            **/
             if (possibleCmds.length === 1) {
                 this.clearBuffer();
                 this.putText(possibleCmds[0]);
@@ -219,7 +198,7 @@ var TSOS;
                         this.cmdInd = 0;
                     }
                 } else if (chr === "down") {
-                    if (this.cmdInd - 1 < -1) {
+                    if (this.cmdInd - 1 > -1) {
                         this.cmdInd--;
                     } else {
                         this.cmdInd = 0;

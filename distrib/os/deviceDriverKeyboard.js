@@ -44,7 +44,7 @@ var TSOS;
                 (keyCode == 32) || // space
                 (keyCode == 13)) { // enter
 
-                /** for printable special characters **/
+                /** for printable special characters on the numpad **/
                 if (isShifted) {
                     var specialChars = {49: "!", 50: "@", 51: "#", 52: "$", 53: "%", 54: "^", 55: "&", 56: "*", 57: "(", 58: ")"};
 

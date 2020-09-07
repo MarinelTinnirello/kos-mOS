@@ -171,6 +171,8 @@ module TSOS {
             Control.hostLog("OS ERROR - TRAP: " + msg);
             // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)
 
+            // TODO: I have a much cooler, CSS-based BSOD
+            //          But here's the original one for the console, if I need to keep it there
             // _Canvas.width = 500;
             // _Canvas.height = 500;
 
@@ -181,6 +183,8 @@ module TSOS {
             // ctx.rect(0, 0, 500, 500);
             // ctx.fillStyle = "blue";
             // ctx.fill();
+
+            // _StdOut.putText("you screwed it up");
 
             this.krnShutdown();
         }

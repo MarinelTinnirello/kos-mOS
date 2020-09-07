@@ -58,7 +58,6 @@ var TSOS;
         //
         // Host Functions
         //
-        //
         static getCurrTime() {
             var date = new Date();      // date object holds date (mm/dd/yyyy) and time
             var day = new Array(7);     // holds days in strings
@@ -75,6 +74,7 @@ var TSOS;
 
             return time;
         }
+        //
         // Host Events
         //
         static hostBtnStartOS_click(btn) {
