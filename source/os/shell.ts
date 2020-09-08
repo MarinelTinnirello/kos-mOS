@@ -412,15 +412,15 @@ module TSOS {
 
             /**** Creates random assortment of box divs every 200 ms ****/
             setInterval(function() {
-                var glitch = document.getElementsByClassName('box');
+                var glitch = document.getElementsByClassName('box') as HTMLCollectionOf<HTMLElement>;
 
                 for (var i = 0; i < glitch.length; i++) {
                     // TypeScript doesn't have ".style" on any ol' element
-                    // Instead, we use "setAttribute("style", whatever)"
-                    glitch[i].setAttribute("style", "left:Math.floor(Math.random()*100)+'vw';");
-                    glitch[i].setAttribute("style", "top:Math.floor(Math.random()*100)+'vh';");
-                    glitch[i].setAttribute("style", "width:Math.floor(Math.random()*400)+'px';");
-                    glitch[i].setAttribute("style", "height:Math.floor(Math.random()*100)+'px';");
+                    // Instead, we set the document's elements as HTMLCollectionOf elements
+                    glitch[i].style.left=Math.floor(Math.random()*100)+'vw';
+                    glitch[i].style.top=Math.floor(Math.random()*100)+'vh';
+                    glitch[i].style.width=Math.floor(Math.random()*400)+'px';
+                    glitch[i].style.height=Math.floor(Math.random()*100)+'px';
                 }
             }, 200);
 

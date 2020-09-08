@@ -59,9 +59,8 @@ var TSOS;
         // Host Functions
         //
         static getCurrTime() {
-            var date = new Date();      // date object holds date (mm/dd/yyyy) and time
-            var day = new Array(7);     // holds days in strings
-
+            var date = new Date(); // date object holds date (mm/dd/yyyy) and time
+            var day = new Array(7); // holds days in strings
             day[0] = "Sunday";
             day[1] = "Monday";
             day[2] = "Tuesday";
@@ -69,9 +68,7 @@ var TSOS;
             day[4] = "Thursday";
             day[5] = "Friday";
             day[6] = "Saturday";
-
             var time = day[date.getDay()] + " " + date.toLocaleDateString() + " " + date.toLocaleTimeString();
-
             return time;
         }
         //
@@ -85,7 +82,7 @@ var TSOS;
             document.getElementById("btnReset").disabled = false;
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
-            // ... set status
+            // .. set status
             document.getElementById("Status").innerHTML = "Status:  RUNNING";
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
             _CPU = new TSOS.Cpu(); // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.

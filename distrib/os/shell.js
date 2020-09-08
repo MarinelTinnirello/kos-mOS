@@ -46,7 +46,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellPrompt, "prompt", "<string> - Sets the prompt.");
             this.commandList[this.commandList.length] = sc;
             // date
-            sc = new TSOS.ShellCommand(this.shellDate, "date", " - Displays the current date and time.")
+            sc = new TSOS.ShellCommand(this.shellDate, "date", " - Displays the current date and time");
             this.commandList[this.commandList.length] = sc;
             // where am I
             sc = new TSOS.ShellCommand(this.shellWhereAmI, "whereami", " - Displays where you are in the U.M.N.");
@@ -63,7 +63,6 @@ var TSOS;
             // load
             sc = new TSOS.ShellCommand(this.shellLoad, "load", "- Loads program from User Program Input.");
             this.commandList[this.commandList.length] = sc;
-
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -286,7 +285,7 @@ var TSOS;
             }
         }
         shellRot13(args) {
-            // This is a Caesar cipher by 13
+            // this is a Caesar cipher by 13
             if (args.length > 0) {
                 // Requires Utils.ts for rot13() function.
                 _StdOut.putText(args.join(' ') + " = '" + TSOS.Utils.rot13(args.join(' ')) + "'");
@@ -305,7 +304,6 @@ var TSOS;
         }
         shellDate(args) {
             var time = TSOS.Control.getCurrTime();
-
             _StdOut.putText(time);
         }
         shellWhereAmI(args) {
@@ -318,7 +316,6 @@ var TSOS;
             // var txt = ' Ye shall be as gods ';
             // var spd = 100;
             // var times = 30;
-
             // /**** Prints out txt 1 char at a time *****/
             // function typeWrite() {
             //     if (ind < txt.length) {
@@ -326,13 +323,10 @@ var TSOS;
             //         ind++;
             //         setTimeout(typeWrite, spd);
             //     }
-
             //     return txt;
             // }
-
             // document.getElementById("overlay").style.width = "100%";
             // document.getElementById("overlay-content-p").innerHTML = typeWrite().repeat(times);
-
             _StdOut.putText("Ye shall be as gods...");
         }
         shellBSOD(args) {
@@ -341,60 +335,57 @@ var TSOS;
             var container = document.getElementById("overlay");
             var count = 20;
             var txt = " 【Ｇａｍｅ　ｏｖｅｒ】 . . . ";
-
             /*** Creates box divs ***/
             for (var i = 0; i < count; i++) {
                 var glitchBx = document.createElement('div');
-
                 glitchBx.className = 'box';
                 container.appendChild(glitchBx);
             }
-
             /**** Creates random assortment of box divs every 200 ms ****/
-            setInterval(function() {
+            setInterval(function () {
                 var glitch = document.getElementsByClassName('box');
-
                 for (var i = 0; i < glitch.length; i++) {
+                    // TypeScript doesn't have ".style" on any ol' element
+                    // Instead, we set the document's elements as HTMLCollectionOf elements
                     glitch[i].style.left = Math.floor(Math.random() * 100) + 'vw';
                     glitch[i].style.top = Math.floor(Math.random() * 100) + 'vh';
                     glitch[i].style.width = Math.floor(Math.random() * 400) + 'px';
                     glitch[i].style.height = Math.floor(Math.random() * 100) + 'px';
                 }
             }, 200);
-
             document.getElementById("overlay").style.width = "100%";
             document.getElementById("overlay").style.backgroundColor = "blue";
             document.getElementById("overlay-content-h").innerHTML = txt;
-
             _Kernel.krnTrapError("You killed Kevin.");
         }
         shellStatus(args) {
             if (args.length > 0) {
                 var status = args.toString();
-
                 document.getElementById("Status").innerHTML = args.join(" ");
-            } else {
+            }
+            else {
                 _StdOut.putText("Usage: status <string>  Please supply a string.");
             }
         }
         shellLoad(args) {
+            // TypeScript doesn't have ".value" on elements
             var program = document.getElementById("taProgramInput").value.trim().toUpperCase();
-            // put extra split(" ") here cause we need it for test()
+            // put extra split() here cause we need it for test()
             var programArr = program.split(" ");
-
             /** Checks if program in text area is valid **/
             if (program === "") {
                 _StdOut.putText("Invalid program.  Usage: Text area is empty.");
-            } else {
+            }
+            else {
                 // trick I learned from Java
                 // regex blocks out whatever specified tokens, in this case, all non-numbers and A - F
                 var regex = /^[0-9a-f]+$/i;
-
                 /*** Cycles through parsed input to check if chars are valid ***/
                 for (var i = 0; i < programArr.length; i++) {
                     if (regex.test(programArr[i]) === false) {
                         _StdOut.putText("Invalid program.  Usage: Invalid hex characters.");
-                    } else {
+                    }
+                    else {
                         _StdOut.putText("Program is valid.");
                     }
                 }

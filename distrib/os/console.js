@@ -34,30 +34,23 @@ var TSOS;
                 // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
                 if (chr === String.fromCharCode(13)) { // enter
                     // The enter key marks the end of a console command, so ...
-                    // check if there's currently any input in the buffer
-                    if (this.buffer.length === 0) {
-                        this.advanceLine();
-                        _OsShell.putPrompt();
-                        return;
-                    }
-
-                    // store cmd
-                    this.cmdHistory[this.cmdHistory.length] = this.buffer;
-                    this.cmdInd = this.cmdHistory.length;
-
                     // ... tell the shell ...
                     _OsShell.handleInput(this.buffer);
                     // ... and reset our buffer.
                     this.buffer = "";
-                } else if (chr === String.fromCharCode(8)) {        // backspace
+                }
+                else if (chr === String.fromCharCode(8)) { // backspace
                     this.erasePrevChar();
-                } else if (chr === String.fromCharCode(9)) {        // tab
+                }
+                else if (chr === String.fromCharCode(9)) { // tab
                     this.autoComplete();
                     console.log("tab pressed");
-                } else if ((chr === "up") || (chr === "down")) {    // up, down
+                }
+                else if ((chr === "up") || (chr === "down")) { // up, down
                     this.putCmdHistory(chr);
                     console.log("cmd hit");
-                } else if (chr == "reset") {
+                }
+                else if (chr == "reset") {
                     // TODO: just doesn't work
                     TSOS.Control.hostBtnReset_click(null);
                     console.log("reset");
@@ -82,29 +75,57 @@ var TSOS;
             */
             if (text !== "") {
                 var arr = text.split(' ');
-
                 if (arr.length > 1 && text !== ' ') {
                     for (var i = 0; i < arr.length; i++) {
                         this.putText(arr[i]);
-
                         if (i !== arr.length - 1) {
                             this.putText(' ');
                         }
                     }
-                } else {
+                }
+                else {
                     // Move the current X position.
                     var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-
                     if (this.currentXPosition + offset > _Canvas.width / window.devicePixelRatio) {
                         this.advanceLine();
                     }
-
                     // Draw the text at the current X and Y coordinates.
-                    _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, 
-                                                this.currentYPosition, text);
+                    _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
                     // Move the current X position.
                     this.currentXPosition = this.currentXPosition + offset;
                 }
+            }
+        }
+        autoComplete() {
+            // the tab function is for auto completing a cmd based on whatever characters we type
+            // could also do this taking a char param, but grabbing all the commands is just easier
+            //     plus, we don't have to make a case for if there's nothing in the buffer
+            var possibleCmds = [];
+            /*** Look through all commands, push them into command list ***/
+            for (var i = 0; i < _OsShell.commandList.length; i++) {
+                if (_OsShell.commandList[i].command.indexOf(this.buffer) === 0) {
+                    possibleCmds.push(_OsShell.commandList[i].command);
+                }
+            }
+            /** if there's more than 1 command in the list, clear buffer and put possible cmd
+             * else, print out all possible commands on the next line
+            **/
+            if (possibleCmds.length === 1) {
+                this.clearBuffer();
+                this.putText(possibleCmds[0]);
+                this.buffer = possibleCmds[0];
+            }
+            else {
+                this.clearBuffer();
+                this.putText("Possible Commands:");
+                for (var i = 0; i < possibleCmds.length; i++) {
+                    this.advanceLine();
+                    this.putText("  " + possibleCmds[i]);
+                }
+                this.advanceLine();
+                // even though it's in clearBuffer(), advanceLine() takes it out
+                // so put this in to make the transition less awkward
+                _StdOut.putText(_OsShell.promptStr);
             }
         }
         advanceLine() {
@@ -117,13 +138,11 @@ var TSOS;
             this.currentYPosition += _DefaultFontSize +
                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                 _FontHeightMargin;
-            
             // TODO: Handle scrolling. (iProject 1)
             // DO NOT try this with a scrollbar added
             // it would be waaaaaaay too hard to continuously capture and recapture what we count as images
             if (this.currentYPosition > _Canvas.height) {
                 var imgData = _DrawingContext.getImageData(0, 20, _Canvas.width, _Canvas.height);
-
                 this.clearScreen();
                 _DrawingContext.putImageData(imgData, 0, 0);
                 this.currentYPosition = _Canvas.height - 5;
@@ -132,13 +151,11 @@ var TSOS;
         erasePrevChar() {
             if (this.buffer.length > 0) {
                 // offset of our current char via slice (new array)
-                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, 
-                                                            this.buffer.slice(-1));
+                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.buffer.slice(-1));
                 // grabs current x - offset
                 var xPos = this.currentXPosition - offset;
                 // grabs current y++ - font size
                 var yPos = this.currentYPosition + 1 - this.currentFontSize;
-
                 _DrawingContext.clearRect(xPos, yPos, this.currentXPosition, this.currentYPosition);
                 this.currentXPosition = xPos;
                 /* use substr() over substring() because we want to specify the string length,
@@ -146,54 +163,15 @@ var TSOS;
                 * this is cause we're doing x/y pos as vars and keeping clearRect() clean
                 */
                 this.buffer = this.buffer.substr(0, this.buffer.length - 1);
-
                 /** handles line wrap for backspacing **/
                 if (this.currentXPosition <= 0) {
                     this.currentYPosition -= this.bufferLineHeight();
-
                     // use this instead of regular xPos so that we can handle anything relating to 
                     //      different fonts
-                    var xCursor = _DrawingContext.measureText(this.currentFont, this.currentFontSize, 
-                                                                _OsShell.promptStr + this.buffer);
-
+                    var xCursor = _DrawingContext.measureText(this.currentFont, this.currentFontSize, _OsShell.promptStr + this.buffer);
                     xCursor = xCursor % _Canvas.width;
                     this.currentXPosition = xCursor;
                 }
-            }
-        }
-        autoComplete() {
-            // the tab function is for auto completing a cmd based on whatever characters we type
-            // could also do this taking a char param, but grabbing all the commands is just easier
-            //     plus, we don't have to make a case for if there's nothing in the buffer
-            var possibleCmds = [];
-
-            /*** Look through all commands, push them into command list ***/
-            for (var i = 0; i < _OsShell.commandList.length; i++) {
-                if (_OsShell.commandList[i].command.indexOf(this.buffer) === 0) {
-                    possibleCmds.push(_OsShell.commandList[i].command);
-                }
-            }
-
-            /** if there's more than 1 command in the list, clear buffer and put possible cmd
-             * else, print out all possible commands on the next line
-            **/
-            if (possibleCmds.length === 1) {
-                this.clearBuffer();
-                this.putText(possibleCmds[0]);
-                this.buffer = possibleCmds[0];
-            } else {
-                this.clearBuffer();
-                this.putText("Possible Commands:");
-
-                for (var i = 0; i < possibleCmds.length; i++) {
-                    this.advanceLine();
-                    this.putText("  " + possibleCmds[i]);
-                }
-
-                this.advanceLine();
-                // even though it's in clearBuffer(), advanceLine() takes it out
-                // so put this in to make the transition less awkward
-                _StdOut.putText(_OsShell.promptStr);
             }
         }
         putCmdHistory(chr) {
@@ -206,49 +184,45 @@ var TSOS;
                 if (chr === "up") {
                     if (this.cmdInd + 1 < this.cmdHistory.length) {
                         this.cmdInd++;
-                    } else {
+                    }
+                    else {
                         this.cmdInd = 0;
                     }
-                } else if (chr === "down") {
+                }
+                else if (chr === "down") {
                     if (this.cmdInd - 1 > -1) {
                         this.cmdInd--;
-                    } else {
+                    }
+                    else {
                         this.cmdInd = 0;
                     }
                 }
             }
-
             // clear buffer, put cmd on line
             this.clearBuffer();
             this.buffer = this.cmdHistory[this.cmdInd];
             this.putText(this.buffer);
         }
         clearBuffer() {
-            // For clearing the whole line 
+            // For clearing the whole line
             this.currentXPosition = 0;
-
-            var bufferSize = _DrawingContext.measureText(this.currentFont, this.currentFontSize, 
-                                                        _OsShell.promptStr + this.buffer);
+            var bufferSize = _DrawingContext.measureText(this.currentFont, this.currentFontSize, _OsShell.promptStr + this.buffer);
             var lineCount = Math.ceil(bufferSize / _Canvas.width);
-
             /** if line wrapped, reset yPos **/
             if (lineCount > 1) {
                 this.currentYPosition -= (lineCount - 1) * this.bufferLineHeight();
             }
-
             // clear row, put cmd on screen
-            _DrawingContext.clearRect(this.currentXPosition, this.currentYPosition - _DefaultFontSize,
-                                        _Canvas.width, lineCount * this.bufferLineHeight());
+            _DrawingContext.clearRect(this.currentXPosition, this.currentYPosition - _DefaultFontSize, _Canvas.width, lineCount * this.bufferLineHeight());
             _StdOut.putText(_OsShell.promptStr);
         }
         bufferLineHeight() {
             // this was too long for me to use multiple times, so it's in it's own function
-
             /* You found Totaka's Song!
                 4|------------------c---|-----------|-------|-------|-------|-
                 3|--c-c-d-e-d-c-g-e---g-|-g-g-G-f-D-|-d-g-c-|-------|-------|-
             */
-            return _DefaultFontSize + _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +_FontHeightMargin;
+            return _DefaultFontSize + _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) + _FontHeightMargin;
         }
     }
     TSOS.Console = Console;
