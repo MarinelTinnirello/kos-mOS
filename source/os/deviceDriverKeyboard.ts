@@ -32,7 +32,9 @@ module TSOS {
             var keyCode = params[0];
             var isShifted = params[1];
             var isCtrled = params[2];
+
             _Kernel.krnTrace("Key code:" + keyCode + " shifted:" + isShifted);
+
             var chr = "";
             // Check to see if we even want to deal with the key that was pressed.
             if ((keyCode >= 65) && (keyCode <= 90)) { // letter
@@ -40,6 +42,10 @@ module TSOS {
                     chr = String.fromCharCode(keyCode); // Uppercase A-Z
                 } else {
                     chr = String.fromCharCode(keyCode + 32); // Lowercase a-z
+                }
+
+                if (isCtrled && chr.toLocaleUpperCase() === "C") {
+                    chr = "reset";
                 }
                 // TODO: Check for caps-lock and handle as shifted if so.
                 _KernelInputQueue.enqueue(chr);
@@ -92,10 +98,6 @@ module TSOS {
             } else if (keyCode == 40) {
                 // send as string, otherwise it prints the keycode/string
                 chr = "down";
-                _KernelInputQueue.enqueue(chr); 
-            } else if (isCtrled === true && keyCode == 67) {
-                // send as string, otherwise it prints the keycode/string
-                chr = "reset";
                 _KernelInputQueue.enqueue(chr); 
             }
         }

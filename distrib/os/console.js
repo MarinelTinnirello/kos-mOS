@@ -50,7 +50,7 @@ var TSOS;
                     this.putCmdHistory(chr);
                     console.log("cmd hit");
                 }
-                else if (chr == "reset") {
+                else if (chr === "reset") {
                     // TODO: just doesn't work
                     TSOS.Control.hostBtnReset_click(null);
                     console.log("reset");
@@ -74,7 +74,8 @@ var TSOS;
                 decided to write one function and use the term "text" to connote string or char.
             */
             if (text !== "") {
-                var arr = text.split(' ');
+                //var arr = text.split(' ');
+                var arr = text.toString().split(' ');
                 if (arr.length > 1 && text !== ' ') {
                     for (var i = 0; i < arr.length; i++) {
                         this.putText(arr[i]);

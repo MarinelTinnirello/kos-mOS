@@ -32,6 +32,9 @@ var TSOS;
             //
             // ... more?
             //
+            // Initialize memory
+            _MemoryManager = new TSOS.MemoryManager();
+            _MemoryManager.init();
             // Enable the OS Interrupts.  (Not the CPU clock interrupt, as that is done in the hardware sim.)
             this.krnTrace("Enabling the interrupts.");
             this.krnEnableInterrupts();
@@ -62,6 +65,9 @@ var TSOS;
                This, on the other hand, is the clock pulse from the hardware / VM / host that tells the kernel
                that it has to look for interrupts and process them if it finds any.
             */
+            // update all host displays (except CPU) before all the interrupt or execution checks
+            // CPU needs to be in execution check cause of Single Step mode
+            TSOS.Control.hostMemoryDisplay();
             // Check for an interrupt, if there are any. Page 560
             if (_KernelInterruptQueue.getSize() > 0) {
                 // Process the first interrupt on the interrupt queue.
@@ -70,7 +76,15 @@ var TSOS;
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             }
             else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed.
-                _CPU.cycle();
+                if (_SingleStepMode) {
+                    if (_NextStepMode) {
+                        _CPU.cycle();
+                    }
+                }
+                else {
+                    _CPU.cycle();
+                }
+                TSOS.Control.hostCputDisplay();
             }
             else { // If there are no interrupts and there is nothing being executed then just be idle.
                 this.krnTrace("Idle");
@@ -104,6 +118,18 @@ var TSOS;
                 case KEYBOARD_IRQ:
                     _krnKeyboardDriver.isr(params); // Kernel mode device driver
                     _StdIn.handleInput();
+                    break;
+                case INVALID_ADDR_IRQ: // Memory address isn't valid
+                    _StdOut.advanceLine();
+                    _StdOut.putText("Invalid memory address. pid=" + params + ", has been killed.");
+                    _StdOut.advanceLine();
+                    _OsShell.putPrompt();
+                    break;
+                case INVALID_OPCODE_IRQ: // Opcode isn't valid
+                    _StdOut.advanceLine();
+                    _StdOut.putText("Invalid opcode. pid=" + params + ", has been killed.");
+                    _StdOut.advanceLine();
+                    _OsShell.putPrompt();
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");

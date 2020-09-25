@@ -109,6 +109,12 @@ module TSOS {
                                     "- Loads program from User Program Input.");
             this.commandList[this.commandList.length] = sc;
 
+            // run
+            sc = new ShellCommand(this.shellRun,
+                                    "run",
+                                    "<pid> - Runs specified proces.");
+            this.commandList[this.commandList.length] = sc;
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -443,26 +449,61 @@ module TSOS {
 
         public shellLoad(args: string[]) {
             // TypeScript doesn't have ".value" on elements
-            var program = (document.getElementById("taProgramInput") as HTMLTextAreaElement).value.trim().toUpperCase();
+            var program = (document.getElementById("taProgramInput") as HTMLTextAreaElement).value.trim().toLocaleUpperCase();
             // put extra split() here cause we need it for test()
-            var programArr = program.split(" ");
+            //var programArr = program.split(" ");
+            var programArr = program.replace(/\s/g, "");
 
             /** Checks if program in text area is valid **/
+            /* In Project 1, I originally checked input via cycling through a for loop
+             * I changed this in Project 2 because I kept reading in the input character by character, which doesn't work
+             * out well cause I needed pairs of hex.  So instead, I switched to the match() in the Regex class.  Not sure
+             * if it's a problem, but instead of throwing an error for say having 3 hex digits strung together, match()
+             * will instead split them to be with whatever comes next.
+             * Ex:      a9f ff 00   =>      a9, ff, f0 (leaves off that last 0 since there's no pair)
+            */
             if (program === "") {
-                _StdOut.putText("Invalid program.  Usage: Text area is empty.");
+                _StdOut.putText("Usage: Text area is empty.");
             } else {
                 // trick I learned from Java
                 // regex blocks out whatever specified tokens, in this case, all non-numbers and A - F
                 var regex = /^[0-9a-f]+$/i;
+                var isValid = regex.test(programArr);
 
-                /*** Cycles through parsed input to check if chars are valid ***/
-                for (var i = 0; i < programArr.length; i++) {
-                    if (regex.test(programArr[i]) === false) {
-                        _StdOut.putText("Invalid program.  Usage: Invalid hex characters.");
-                    } else {
-                        _StdOut.putText("Program is valid.");
-                    }
+                if (isValid) {
+                    var hexPair = programArr.match(/.{2}/g);
+                    var Pcb = _MemoryManager.load(hexPair, args[0]);
+
+                    // in order to use formatting for pid, you need to use " ` ` "
+                    // "" treats text like a literal, `` allows for templating
+                    _StdOut.putText(`Program loaded - PID: ${Pcb.pid}`);
+                } else {
+                    _StdOut.putText("Usage: Invalid hex characters.");
                 }
+
+                // /*** Cycles through parsed input to check if chars are valid ***/
+                // for (var i = 0; i < programArr.length; i++) {
+                //     if (regex.test(programArr[i]) === false) {
+                //         _StdOut.putText("Invalid program.  Usage: Invalid hex characters.");
+                //     } else {
+                //         //_StdOut.putText("Program is valid.");
+                //         var hexPair = programArr.match(/.{2}/g);
+                //         //var Pcb = _MemoryManager.load(hexPair, args[0]);
+                //         _StdOut.putText(hexPair.toString());
+
+                //         //_StdOut.putText("Program loaded - PID: ${Pcb.pid}");
+                //     }
+                // }
+            }
+        }
+
+        public shellRun(args): void {
+            if (args.length > 0) {
+                var pid = parseInt(args[0]);
+                
+                _StdOut.putText(`Running process.  PID: ${pid}`);
+            } else {
+                _StdOut.putText("Usage: run <pid>  Please supply a pid.");
             }
         }
     }

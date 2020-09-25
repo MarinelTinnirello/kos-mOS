@@ -20,6 +20,22 @@
 //
 module TSOS {
 
+    var opCodeMap = {"A9": {"pcNum": 1},
+                     "AD": {"pcNum": 2},
+                     "8D": {"pcNum": 2},
+                     "6D": {"pcNum": 2},
+                     "A2": {"pcNum": 1},
+                     "AE": {"pcNum": 2},
+                     "A0": {"pcNum": 1},
+                     "AC": {"pcNum": 2},
+                     "EA": {"pcNum": 0},
+                     "00": {"pcNum": 0},
+                     "EC": {"pcNum": 2},
+                     "D0": {"pcNum": 1},
+                     "EE": {"pcNum": 2},
+                     "FF": {"pcNum": 0}
+                    };
+
     export class Control {
 
         public static hostInit(): void {
@@ -89,8 +105,124 @@ module TSOS {
             return time;
         }
 
+        public static hostMemoryDisplay(): void {
+            var table = document.getElementById("tableMemory") as HTMLTableElement;
+            var tBody = document.createElement('tbody');
+
+            table.style.display = 'block';
+
+            // table data taken from Memory
+            var row;
+            var rowLabel = "0x000";
+            var rowNum = 0;
+            var placeNum = 0;
+            var highlightCell;
+            
+            // Memory data needed to be placed in table
+            var p_addr = 0;
+            var memory = _Memory.memory;
+
+            for (var i = 0; i < MEMORY_SIZE / 8; i++) {
+                row = tBody.insertRow(-1);
+                rowNum = i * 8;
+
+                // ... setting up padding for labels
+
+                /** for placing 0s in the row label **/
+                if (rowNum > 255) {
+                    placeNum = 2;
+                } else if (rowNum > 15) {
+                    placeNum = 3;
+                } else {
+                    placeNum = 4
+                }
+
+                row.insertCell(-1).innerHTML = rowLabel.slice(0, placeNum) + rowNum.toString(16).toLocaleUpperCase();
+
+                // ... grabbing info from Memory
+
+                var cell;
+                var currOp = _CPU.IR.toString(16).toLocaleUpperCase();;
+                var opHighlights = [];
+
+                for (var j = 0; j < 8; j++) {
+                    cell = row.insertCell(-1);
+                    cell.innerHTML = memory[p_addr].toLocaleUpperCase();
+
+                    // ... hightlights current address and op codes
+
+                    if (_CPU.Pcb && _CPU.isExecuting && opCodeMap[currOp].pcNum) {
+                        if ((_CPU.Pcb.segment.base + _CPU.PC - opCodeMap[currOp].pcNum - 1) == p_addr) {
+                            cell.style.background = "#00adec";
+                            highlightCell = cell;
+
+                            opHighlights[0] = opCodeMap[currOp].pcNum;
+                            opHighlights[1] = false;
+
+                            /** if current op code is D0, don't highlight
+                             * this is cause D0 is our branch operation 
+                            **/
+                           if (currOp == "D0") {
+                               opHighlights[0] = 0;
+                           }
+                        }
+
+                        if ((opHighlights[0] > 0) && opHighlights[1]) {
+                            cell.style.background = "#ff00ff";
+                            highlightCell = cell;
+
+                            opHighlights[0]--;
+                        }
+
+                        if ((opHighlights[0] > 0) && (!opHighlights[1])) {
+                            opHighlights[1] = true;
+                        }
+                    }
+
+                    p_addr++;
+                }
+
+                table.replaceChild(tBody, table.tBodies[0]);
+
+                if (highlightCell) {
+                    highlightCell.scrollIntoView({block: `nearest`});
+                }
+            }
+        }
+
+        public static hostCputDisplay(): void {
+            var table = document.getElementById("tableCpu") as HTMLTableElement;
+            var tBody = document.createElement("tbody");
+            var currOp = _CPU.IR.toString(16).toLocaleUpperCase();
+            var row = table.rows[1];
+
+            /** if invalid op code, exit **/
+            if (!opCodeMap[currOp]) {
+                return;
+            }
+
+            // ... grabs info from CPU
+            row.cells[0].innerHTML = (_CPU.PC - opCodeMap[currOp].pcNum - 1).toString();
+            row.cells[1].innerHTML = currOp;
+            row.cells[2].innerHTML = _CPU.Acc.toString(16).toLocaleUpperCase();
+            row.cells[3].innerHTML = _CPU.Xreg.toString(16).toLocaleUpperCase();
+            row.cells[4].innerHTML = _CPU.Yreg.toString(16).toLocaleUpperCase();
+            row.cells[5].innerHTML = _CPU.Zflag.toString(16).toLocaleUpperCase();
+        }
+
+        // TODO: don't do this for Project 2, you're gonna need to set up a Scheduler
+        public static hostPcbDisplay(): void {
+            var table = document.getElementById("tablePcb") as HTMLTableElement;
+            var tBody = document.createElement("tbody");
+
+            table.style.display = 'block';
+            table.style.height = '200px';
+
+            var row;
+        }
+
         //
-        // Host Events
+        // Host Button Events
         //
         public static hostBtnStartOS_click(btn): void {
             // Disable the (passed-in) start button...
@@ -99,6 +231,7 @@ module TSOS {
             // .. enable the Halt and Reset buttons ...
             (<HTMLButtonElement>document.getElementById("btnHaltOS")).disabled = false;
             (<HTMLButtonElement>document.getElementById("btnReset")).disabled = false;
+            (<HTMLButtonElement>document.getElementById("btnSingleStepMode")).disabled = false;
 
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
@@ -109,6 +242,11 @@ module TSOS {
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
             _CPU = new Cpu();  // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
             _CPU.init();       //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
+
+            // ... Create and initialize memory
+            _Memory = new Memory();
+            _Memory.init();
+            _MemoryAccessor = new TSOS.MemoryAccessor();
 
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
@@ -134,6 +272,18 @@ module TSOS {
             // That boolean parameter is the 'forceget' flag. When it is true it causes the page to always
             // be reloaded from the server. If it is false or not specified the browser may reload the
             // page from its cache, which is not what we want.
+        }
+
+        public static hostBtnSingleStepMode_click(btn): void {
+            _SingleStepMode = !_SingleStepMode;
+
+            var nextStep = (document.getElementById("btnNextStepMode") as HTMLButtonElement).disabled = !_SingleStepMode;
+        }
+
+        public static hostBtnNextStepMode_click(btn): void {
+            if (_SingleStepMode) {
+                _NextStepMode = true;
+            }
         }
     }
 }

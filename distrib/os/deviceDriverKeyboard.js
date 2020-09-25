@@ -37,6 +37,9 @@ var TSOS;
                 else {
                     chr = String.fromCharCode(keyCode + 32); // Lowercase a-z
                 }
+                if (isCtrled && chr.toLocaleUpperCase() === "C") {
+                    chr = "reset";
+                }
                 // TODO: Check for caps-lock and handle as shifted if so.
                 _KernelInputQueue.enqueue(chr);
             }
@@ -86,11 +89,6 @@ var TSOS;
             else if (keyCode == 40) {
                 // send as string, otherwise it prints the keycode/string
                 chr = "down";
-                _KernelInputQueue.enqueue(chr);
-            }
-            else if (isCtrled === true && keyCode == 67) {
-                // send as string, otherwise it prints the keycode/string
-                chr = "reset";
                 _KernelInputQueue.enqueue(chr);
             }
         }
