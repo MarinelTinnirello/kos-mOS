@@ -9,11 +9,13 @@
 var TSOS;
 (function (TSOS) {
     class Memory {
+        //public memory;
         constructor(memory = []) {
             this.memory = memory;
+            //this.memory = memory;
         }
         init() {
-            for (var i = 0; i < MEMORY_SIZE; i++) {
+            for (var i = 0; i < MEMORY_SIZE * NUM_OF_SEGMENTS; i++) {
                 this.memory[i] = "00";
             }
         }

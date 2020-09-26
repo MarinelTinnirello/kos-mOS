@@ -10,13 +10,13 @@
 module TSOS {
     
     export class Memory {
-        public memory;
+        //public memory;
 
-        constructor(memory= []) {
-            this.memory = memory;
+        constructor(public memory: string[] = []) {
+            //this.memory = memory;
         }
 
-        init(): void {
+        public init(): void {
             for (var i = 0; i < MEMORY_SIZE; i++) {
                 this.memory[i] = "00";
             }

@@ -18,7 +18,7 @@ module TSOS {
                     public Zflag: number = 0,
                     public waitCycles: number = 0,
                     public executeCycles: number = 0,
-                    public segment = [],
+                    public segment = {},
                     public state: string = "new") {
         }
     }

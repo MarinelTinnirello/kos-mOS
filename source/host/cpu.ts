@@ -85,10 +85,18 @@ module TSOS {
                     this.sysCall();
                     break;
                 default:
-                    //_Kernel.krnTrapError(`Process Execution Exception: Instruction '${this.IR.toString(16).toUpperCase()}' is not valid`);
-                    //this.PCB.terminate();
+                    _KernelInterruptQueue.enqueue(new Interrupt(INVALID_OPCODE_IRQ, this.Pcb.pid))
+                    _MemoryManager.terminate();
                     this.isExecuting = false;
             }
+        }
+
+        public updatePcb(pcb: Pcb): void {
+            this.PC = pcb.PC;
+            this.Acc = pcb.Acc;
+            this.Xreg = pcb.Xreg;
+            this.Yreg = pcb.Yreg;
+            this.Zflag = pcb.Zflag;
         }
 
         //
@@ -150,7 +158,8 @@ module TSOS {
         }
 
         public brk(): void {
-            //return;
+            this.Pcb.terminate();
+            this.isExecuting = false;
         }
 
         public compare(): void {
@@ -182,10 +191,21 @@ module TSOS {
 
         public sysCall(): void {
             if (this.Xreg === 1) {
-                //_KernelInterruptQueue.enqueue(new TSOS.Interrupt(PRINT_YREGISTER_IRQ));
+                //_KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSCALL_IRQ, this.Yreg.toString()));
+                _StdOut.putText(this.Yreg.toString());
             }
             else if (this.Xreg === 2) {
-                //_KernelInterruptQueue.enqueue(new TSOS.Interrupt(PRINT_FROM_MEMORY_IRQ));
+                var output = "";
+                var addr = this.Yreg;
+                var value = parseInt(_MemoryAccessor.read(_CPU.Pcb.segment, addr), 16);
+
+                while (value !== 0) {
+                    output += String.fromCharCode(value);
+                    value = parseInt(_MemoryAccessor.read(_CPU.Pcb.segment, ++addr), 16);
+                }
+
+                //_KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSCALL_IRQ, output));
+                _StdOut.putText(output);
             }
         }
     }

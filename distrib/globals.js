@@ -19,6 +19,8 @@ const TIMER_IRQ = 0; // Pages 23 (timer), 9 (interrupts), and 561 (interrupt pri
 const KEYBOARD_IRQ = 1;
 const INVALID_ADDR_IRQ = 2;
 const INVALID_OPCODE_IRQ = 3;
+const TERMINATE_PROCESS_IRQ = 4;
+const SYSCALL_IRQ = 5;
 // Memory
 const MEMORY_SIZE = 256;
 const NUM_OF_SEGMENTS = 3;

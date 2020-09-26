@@ -14,7 +14,7 @@ var TSOS;
             this.isAvailable = isAvailable;
         }
         init() {
-            for (var i = 0; i < NUM_OF_SEGMENTS; i++) {
+            for (var i = 0; i < MEMORY_SIZE / NUM_OF_SEGMENTS; i++) {
                 this.isAvailable[i] = true;
                 this.registers[i] = { index: i,
                     base: MEMORY_SIZE * i,
@@ -24,7 +24,7 @@ var TSOS;
         }
         load(program, priority) {
             var segment;
-            for (let i = 0; i < this.isAvailable.length; i++) {
+            for (var i = 0; i < this.isAvailable.length; i++) {
                 if (this.isAvailable[i]) {
                     segment = i;
                     break;
@@ -52,8 +52,9 @@ var TSOS;
             _CPU.isExecuting = true;
         }
         terminate() {
-            var pcb = new TSOS.Pcb();
+            var pcb = _CPU.Pcb;
             if (_CPU.Pcb && _CPU.Pcb != "terminated") {
+                _CPU.updatePcb(pcb);
                 _CPU.Pcb.state = "terminated";
                 _CPU.isExecuting = false;
             }

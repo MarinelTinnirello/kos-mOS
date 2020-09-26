@@ -502,6 +502,7 @@ module TSOS {
                 var pid = parseInt(args[0]);
                 
                 _StdOut.putText(`Running process.  PID: ${pid}`);
+                _MemoryManager.run(pid);
             } else {
                 _StdOut.putText("Usage: run <pid>  Please supply a pid.");
             }

@@ -18,12 +18,12 @@ module TSOS {
         public p_addr;
         public v_addr;
 
-        public read(segment, v_addr) {
+        public read(segment, v_addr): string {
             var p_addr = v_addr + segment.base;
 
             if (p_addr >= segment.limit || v_addr < 0) {
-                //_Kernel.krnTrapError("Memory read exception: Cannot read memory address. Address is out of bounds");
-                //_Dispatcher.terminateCurrentProcess();
+                _KernelInterruptQueue.enqueue(new Interrupt(INVALID_ADDR_IRQ, _CPU.Pcb.pid))
+                _MemoryManager.terminate();
 
                 return;
             }
@@ -35,10 +35,9 @@ module TSOS {
         public write(segment, v_addr, hexPair): boolean {
             var p_addr = v_addr + segment.base;
 
-            // Memory protection
             if (p_addr >= segment.limit || v_addr < 0) {
-                //_Kernel.krnTrapError("Memory write exception: Cannot write to memory address. Address is out of bounds.");
-                //_Dispatcher.terminateCurrentProcess();
+                _KernelInterruptQueue.enqueue(new Interrupt(INVALID_ADDR_IRQ, _CPU.Pcb.pid))
+                _MemoryManager.terminate();
 
                 return false;
             }

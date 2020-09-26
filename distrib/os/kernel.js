@@ -121,15 +121,21 @@ var TSOS;
                     break;
                 case INVALID_ADDR_IRQ: // Memory address isn't valid
                     _StdOut.advanceLine();
-                    _StdOut.putText("Invalid memory address. pid=" + params + ", has been killed.");
+                    _StdOut.putText("Invalid memory address. pid=" + params + ", has been terminated.");
                     _StdOut.advanceLine();
                     _OsShell.putPrompt();
                     break;
                 case INVALID_OPCODE_IRQ: // Opcode isn't valid
                     _StdOut.advanceLine();
-                    _StdOut.putText("Invalid opcode. pid=" + params + ", has been killed.");
+                    _StdOut.putText("Invalid opcode. pid=" + params + ", has been terminated.");
                     _StdOut.advanceLine();
                     _OsShell.putPrompt();
+                    break;
+                case TERMINATE_PROCESS_IRQ:
+                    _MemoryManager.terminate();
+                    break;
+                case SYSCALL_IRQ:
+                    _StdOut.putText(params);
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");

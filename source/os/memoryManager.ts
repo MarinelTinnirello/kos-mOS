@@ -10,11 +10,11 @@
 module TSOS {
 
     export class MemoryManager {
-        constructor(public registers = [], 
+        constructor(public registers: any[] = [], 
                     public isAvailable: boolean[] = []) {
         }
 
-        init(): void {
+        public init(): void {
             for (var i = 0; i < NUM_OF_SEGMENTS; i++) {
                 this.isAvailable[i] = true;
                 this.registers[i] = { index: i,
@@ -27,7 +27,7 @@ module TSOS {
         public load(program, priority): Pcb {
             var segment;
 
-            for (let i = 0; i < this.isAvailable.length; i++) {
+            for (var i = 0; i < this.isAvailable.length; i++) {
                 if (this.isAvailable[i]) {
                     segment = i;
 
@@ -67,8 +67,10 @@ module TSOS {
         }
 
         public terminate() {
-            var pcb = new TSOS.Pcb();
+            var pcb = _CPU.Pcb;
+            
             if (_CPU.Pcb && _CPU.Pcb != "terminated") {
+                _CPU.updatePcb(pcb);
                 _CPU.Pcb.state = "terminated";
                 _CPU.isExecuting = false;
             }
