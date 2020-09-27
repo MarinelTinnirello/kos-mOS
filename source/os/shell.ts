@@ -448,6 +448,11 @@ module TSOS {
         }
 
         public shellLoad(args: string[]) {
+            /* In between Project 1 and 2, I should have changed all instances of toUpperCase() into toLocaleUpperCase()
+             * I was reading an article on the internationalization of software and realized "Oh yeah, I should do that".
+             * ... Well that, and I also did it to my time functions, so I should keep it consistent.
+            */
+
             // TypeScript doesn't have ".value" on elements
             var program = (document.getElementById("taProgramInput") as HTMLTextAreaElement).value.trim().toLocaleUpperCase();
             // put extra split() here cause we need it for test()
@@ -480,29 +485,27 @@ module TSOS {
                 } else {
                     _StdOut.putText("Usage: Invalid hex characters.");
                 }
-
-                // /*** Cycles through parsed input to check if chars are valid ***/
-                // for (var i = 0; i < programArr.length; i++) {
-                //     if (regex.test(programArr[i]) === false) {
-                //         _StdOut.putText("Invalid program.  Usage: Invalid hex characters.");
-                //     } else {
-                //         //_StdOut.putText("Program is valid.");
-                //         var hexPair = programArr.match(/.{2}/g);
-                //         //var Pcb = _MemoryManager.load(hexPair, args[0]);
-                //         _StdOut.putText(hexPair.toString());
-
-                //         //_StdOut.putText("Program loaded - PID: ${Pcb.pid}");
-                //     }
-                // }
             }
         }
 
         public shellRun(args): void {
+            /** check if there's a pid arguement to pass **/
             if (args.length > 0) {
+                // parse the pid arguement and push it into a list of processes
                 var pid = parseInt(args[0]);
+                var pcb = PROCESS_LIST.find(val => val.pid == pid);
                 
-                _StdOut.putText(`Running process.  PID: ${pid}`);
-                _MemoryManager.run(pid);
+                /** check whether there's anything in the PCB or if it's being ran or terminated **/
+                if (!pcb) {
+                    _StdOut.putText(`Usage: ${pid} does not exist.`);
+                } else if (pcb.state === "ready") {
+                    _StdOut.putText(`Process ${pid} is currently running.`);
+                } else if (pcb.state === "terminated") {
+                    _StdOut.putText(`Usage: ${pid} already ran and has been terminated.`);
+                } else {
+                    _StdOut.putText(`Running process.  PID: ${pid}`);
+                    _MemoryManager.run(pcb);
+                }                
             } else {
                 _StdOut.putText("Usage: run <pid>  Please supply a pid.");
             }

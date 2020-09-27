@@ -35,7 +35,7 @@
    <!-- Other Routines -->
    <script type="text/javascript" src="distrib/utils.js"></script>
    <!-- Uncomment the line below to enable GLaDOS testing. -->
-   <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip0.js"></script>
+   <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip2.js"></script>
    
 </head>
 
@@ -128,7 +128,7 @@
 
    <div id="divMemory">
       <label>Memory</label>
-      <div id="displayMemory" style="height: 150px; overflow-y: scroll;">
+      <div id="displayMemory" style="height: 150px; overflow-y: scroll; display: block;">
          <table id="tableMemory">
             <tbody></tbody>
          </table>
@@ -139,7 +139,7 @@
       <label>CPU</label>
       <div id="displayCpu">
          <table id="tableCpu" style="table-layout: fixed; width: 100%; text-align: center;">
-            <tbody>
+            <!-- <tbody>
                <tr>
                   <th>PC</th>
                   <th>ACC</th>
@@ -154,6 +154,26 @@
                   <td>00</td>
                   <td>00</td>
                   <td>00</td>
+                  <td>0</td>
+               </tr>
+            </tbody> -->
+            <thead>
+               <tr>
+                  <td>PC</td>
+                  <td>Acc</td>
+                  <td>IR</td>
+                  <td>X</td>
+                  <td>Y</td>
+                  <td>Z</td>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
                   <td>0</td>
                </tr>
             </tbody>

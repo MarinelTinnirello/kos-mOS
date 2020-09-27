@@ -137,8 +137,8 @@ var TSOS;
             this.PC++;
         }
         brk() {
-            this.Pcb.terminate();
             this.isExecuting = false;
+            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, this.Pcb.pid));
         }
         compare() {
             var addr = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 2), 16);
@@ -163,6 +163,8 @@ var TSOS;
             this.PC += 3;
         }
         sysCall() {
+            // TODO: change the putText() to be the interrupts
+            //       didn't like the passed params, so look up what the issue is
             if (this.Xreg === 1) {
                 //_KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSCALL_IRQ, this.Yreg.toString()));
                 _StdOut.putText(this.Yreg.toString());

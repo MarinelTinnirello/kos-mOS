@@ -148,12 +148,12 @@ module TSOS {
                     _StdOut.advanceLine();
                     _OsShell.putPrompt();
                     break;
-                case TERMINATE_PROCESS_IRQ:
+                case TERMINATE_PROCESS_IRQ:           // Terminate process
                     _MemoryManager.terminate();
                     break;
-                case SYSCALL_IRQ:
-                    _StdOut.putText(params);
-                    break;
+                // case SYSCALL_IRQ:                     // Prints out characters made from System Call function
+                //     _StdOut.putText(params);
+                //     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
             }

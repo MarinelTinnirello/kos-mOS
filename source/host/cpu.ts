@@ -157,9 +157,9 @@ module TSOS {
             this.PC++;
         }
 
-        public brk(): void {
-            this.Pcb.terminate();
+        public brk(): void {            
             this.isExecuting = false;
+            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, this.Pcb.pid));
         }
 
         public compare(): void {
@@ -190,6 +190,9 @@ module TSOS {
         }
 
         public sysCall(): void {
+            // TODO: change the putText() to be the interrupts
+            //       didn't like the passed params, so look up what the issue is
+            
             if (this.Xreg === 1) {
                 //_KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSCALL_IRQ, this.Yreg.toString()));
                 _StdOut.putText(this.Yreg.toString());

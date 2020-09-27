@@ -19,21 +19,8 @@
 //
 var TSOS;
 (function (TSOS) {
-    var opCodeMap = { "A9": { "pcNum": 1 },
-        "AD": { "pcNum": 2 },
-        "8D": { "pcNum": 2 },
-        "6D": { "pcNum": 2 },
-        "A2": { "pcNum": 1 },
-        "AE": { "pcNum": 2 },
-        "A0": { "pcNum": 1 },
-        "AC": { "pcNum": 2 },
-        "EA": { "pcNum": 0 },
-        "00": { "pcNum": 0 },
-        "EC": { "pcNum": 2 },
-        "D0": { "pcNum": 1 },
-        "EE": { "pcNum": 2 },
-        "FF": { "pcNum": 0 }
-    };
+    // TODO: try and change the op code map to be a public object, should throw it into CPU.ts
+    //       if I do that, I can probably scrap the whole switch case and keep the decode/execute a lot smaller
     class Control {
         static hostInit() {
             // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
@@ -87,9 +74,24 @@ var TSOS;
             return time;
         }
         static hostMemoryDisplay() {
+            var opCodeMap = { "A9": { "pcNum": 1 },
+                "AD": { "pcNum": 2 },
+                "8D": { "pcNum": 2 },
+                "6D": { "pcNum": 2 },
+                "A2": { "pcNum": 1 },
+                "AE": { "pcNum": 2 },
+                "A0": { "pcNum": 1 },
+                "AC": { "pcNum": 2 },
+                "EA": { "pcNum": 0 },
+                "00": { "pcNum": 0 },
+                "EC": { "pcNum": 2 },
+                "D0": { "pcNum": 1 },
+                "EE": { "pcNum": 2 },
+                "FF": { "pcNum": 0 }
+            };
             var table = document.getElementById("tableMemory");
             var tBody = document.createElement('tbody');
-            table.style.display = 'block';
+            //table.style.display = 'block';
             // table data taken from Memory
             var row;
             var rowLabel = "0x000";
@@ -99,6 +101,7 @@ var TSOS;
             // Memory data needed to be placed in table
             var p_addr = 0;
             var memory = _Memory.memory;
+            /*** split the table into 8x8 ***/
             for (var i = 0; i < MEMORY_SIZE / 8; i++) {
                 row = tBody.insertRow(-1);
                 rowNum = i * 8;
@@ -113,17 +116,24 @@ var TSOS;
                 else {
                     placeNum = 4;
                 }
+                // ... sets a given row's label
                 row.insertCell(-1).innerHTML = rowLabel.slice(0, placeNum) + rowNum.toString(16).toLocaleUpperCase();
                 // ... grabbing info from Memory
                 var cell;
                 var currOp = _CPU.IR.toString(16).toLocaleUpperCase();
                 ;
                 var opHighlights = [];
+                /*** loop through cells in the row ***/
                 for (var j = 0; j < 8; j++) {
                     cell = row.insertCell(-1);
                     cell.innerHTML = memory[p_addr].toLocaleUpperCase();
-                    // ... hightlights current address and op codes
-                    if (_CPU.Pcb && _CPU.isExecuting && opCodeMap[currOp].pcNum) {
+                    /** highlights current address and op codes
+                     * if PCB exists in CPU, program is executing, and whatever current op code we're on, highlight
+                    **/
+                    if (_CPU.Pcb && _CPU.isExecuting && opCodeMap[currOp]) {
+                        /** if PCB segment's base + PC - current op code's PC - 1 = physical address, highlight blue
+                         * we want that extra "-1" due to the PC being incremented at the end of a cycle
+                        **/
                         if ((_CPU.Pcb.segment.base + _CPU.PC - opCodeMap[currOp].pcNum - 1) == p_addr) {
                             cell.style.background = "#00adec";
                             highlightCell = cell;
@@ -136,11 +146,13 @@ var TSOS;
                                 opHighlights[0] = 0;
                             }
                         }
+                        /** if the 1st index is greater than 0 and there's something in the 2nd, highlight pink **/
                         if ((opHighlights[0] > 0) && opHighlights[1]) {
                             cell.style.background = "#ff00ff";
                             highlightCell = cell;
                             opHighlights[0]--;
                         }
+                        /** if the 1st index is greater than 0 and there's not something in the 2nd, skip highlight **/
                         if ((opHighlights[0] > 0) && (!opHighlights[1])) {
                             opHighlights[1] = true;
                         }
@@ -148,36 +160,78 @@ var TSOS;
                     p_addr++;
                 }
                 table.replaceChild(tBody, table.tBodies[0]);
+                /**if highlighted cell, scroll into view **/
                 if (highlightCell) {
                     highlightCell.scrollIntoView({ block: `nearest` });
                 }
             }
         }
         static hostCputDisplay() {
+            // var opCodeMap = {"A9": {"pcNum": 1},
+            //                 "AD": {"pcNum": 2},
+            //                 "8D": {"pcNum": 2},
+            //                 "6D": {"pcNum": 2},
+            //                 "A2": {"pcNum": 1},
+            //                 "AE": {"pcNum": 2},
+            //                 "A0": {"pcNum": 1},
+            //                 "AC": {"pcNum": 2},
+            //                 "EA": {"pcNum": 0},
+            //                 "00": {"pcNum": 0},
+            //                 "EC": {"pcNum": 2},
+            //                 "D0": {"pcNum": 1},
+            //                 "EE": {"pcNum": 2},
+            //                 "FF": {"pcNum": 0}
+            //                 };
+            // var table = document.getElementById("tableCpu") as HTMLTableElement;
+            // var row = table.rows[1];
+            // var currOp = _CPU.IR.toString(16).toLocaleUpperCase();
+            // /** if invalid op code, exit **/
+            // if (!opCodeMap[currOp]) {
+            //     return;
+            // }
+            // // ... grabs info from CPU
+            // row.cells[0].innerHTML = (_CPU.PC - opCodeMap[currOp].pcNum - 1).toString();
+            // row.cells[1].innerHTML = currOp;
+            // row.cells[2].innerHTML = _CPU.Acc.toString(16).toLocaleUpperCase();
+            // row.cells[3].innerHTML = _CPU.Xreg.toString(16).toLocaleUpperCase();
+            // row.cells[4].innerHTML = _CPU.Yreg.toString(16).toLocaleUpperCase();
+            // row.cells[5].innerHTML = _CPU.Zflag.toString(16).toLocaleUpperCase();
             var table = document.getElementById("tableCpu");
-            var tBody = document.createElement("tbody");
-            var currOp = _CPU.IR.toString(16).toLocaleUpperCase();
-            var row = table.rows[1];
-            /** if invalid op code, exit **/
-            if (!opCodeMap[currOp]) {
-                return;
+            table.deleteRow(-1);
+            var row = table.insertRow(-1);
+            var cell;
+            // PC
+            cell = row.insertCell();
+            cell.innerHTML = _CPU.PC.toString(16).toLocaleUpperCase();
+            // Acc
+            cell = row.insertCell();
+            cell.innerHTML = _CPU.Acc.toString(16).toLocaleUpperCase();
+            // IR
+            cell = row.insertCell();
+            if (_CPU.isExecuting) {
+                cell.innerHTML = _Memory.memory[_CPU.PC].toString();
             }
-            // ... grabs info from CPU
-            row.cells[0].innerHTML = (_CPU.PC - opCodeMap[currOp].pcNum - 1).toString();
-            row.cells[1].innerHTML = currOp;
-            row.cells[2].innerHTML = _CPU.Acc.toString(16).toLocaleUpperCase();
-            row.cells[3].innerHTML = _CPU.Xreg.toString(16).toLocaleUpperCase();
-            row.cells[4].innerHTML = _CPU.Yreg.toString(16).toLocaleUpperCase();
-            row.cells[5].innerHTML = _CPU.Zflag.toString(16).toLocaleUpperCase();
+            else {
+                cell.innerHTML = "0";
+            }
+            // X Reg
+            cell = row.insertCell();
+            cell.innerHTML = _CPU.Xreg.toString(16).toLocaleUpperCase();
+            // Y Reg
+            cell = row.insertCell();
+            cell.innerHTML = _CPU.Yreg.toString(16).toLocaleUpperCase();
+            // Z Flag
+            cell = row.insertCell();
+            cell.innerHTML = _CPU.Zflag.toString(16).toLocaleUpperCase();
         }
         // TODO: don't do this for Project 2, you're gonna need to set up a Scheduler
-        static hostPcbDisplay() {
-            var table = document.getElementById("tablePcb");
-            var tBody = document.createElement("tbody");
-            table.style.display = 'block';
-            table.style.height = '200px';
-            var row;
-        }
+        // public static hostPcbDisplay(): void {
+        //     var table = document.getElementById("tablePcb") as HTMLTableElement;
+        //     var tBody = document.createElement("tbody");
+        //     table.style.display = 'block';
+        //     table.style.height = '200px';
+        //     var row;
+        // }
         //
         // Host Button Events
         //

@@ -17,13 +17,17 @@ const CPU_CLOCK_INTERVAL = 100; // This is in ms (milliseconds) so 1000 = 1 seco
 const TIMER_IRQ = 0; // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority).
 // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ = 1;
-const INVALID_ADDR_IRQ = 2;
-const INVALID_OPCODE_IRQ = 3;
-const TERMINATE_PROCESS_IRQ = 4;
-const SYSCALL_IRQ = 5;
+const INVALID_ADDR_IRQ = 2; // invalid memory address interrupt
+const INVALID_OPCODE_IRQ = 3; // invalid op code interrupt
+const TERMINATE_PROCESS_IRQ = 4; // terminate process interrupt
+const SYSCALL_IRQ = 5; // system call intterupt
 // Memory
-const MEMORY_SIZE = 256;
-const NUM_OF_SEGMENTS = 3;
+const MEMORY_SIZE = 256; // size of a memory segment
+const NUM_OF_SEGMENTS = 3; // number of memory segments
+// Processes
+const PROCESS_LIST = []; // list of processes
+//const PROCESS_QUEUE = [];
+const CURR_PROCESS = null; // current process in the list
 //
 // Global Variables
 // TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.
