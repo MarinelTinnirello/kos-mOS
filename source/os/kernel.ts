@@ -92,6 +92,7 @@ module TSOS {
                 if (_SingleStepMode) {
                     if (_NextStepMode) {
                         _CPU.cycle();
+                        _NextStepMode = false;
                     }
                 } else {
                     _CPU.cycle();
@@ -138,18 +139,22 @@ module TSOS {
                     break;
                 case INVALID_ADDR_IRQ:                // Memory address isn't valid
                     _StdOut.advanceLine();
-                    _StdOut.putText("Invalid memory address. pid=" + params + ", has been terminated.");
+                    _StdOut.putText("Invalid memory address. PID=" + params + ", has been terminated.");
                     _StdOut.advanceLine();
                     _OsShell.putPrompt();
                     break;
                 case INVALID_OPCODE_IRQ:              // Opcode isn't valid
                     _StdOut.advanceLine();
-                    _StdOut.putText("Invalid opcode. pid=" + params + ", has been terminated.");
+                    _StdOut.putText("Invalid opcode. PID=" + params + ", has been terminated.");
                     _StdOut.advanceLine();
                     _OsShell.putPrompt();
                     break;
                 case TERMINATE_PROCESS_IRQ:           // Terminate process
                     _MemoryManager.terminate();
+                    _StdOut.advanceLine();
+                    _StdOut.putText("PID=" + params + " has been terminated.");
+                    _StdOut.advanceLine();
+                    _OsShell.putPrompt();
                     break;
                 // case SYSCALL_IRQ:                     // Prints out characters made from System Call function
                 //     _StdOut.putText(params);

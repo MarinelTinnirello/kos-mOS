@@ -51,8 +51,8 @@ var TSOS;
                     console.log("cmd hit");
                 }
                 else if (chr === "reset") {
-                    // TODO: just doesn't work
-                    TSOS.Control.hostBtnReset_click(null);
+                    //TSOS.Control.hostBtnReset_click(null);
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, _CPU.Pcb.pid));
                     console.log("reset");
                 }
                 else {

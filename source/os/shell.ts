@@ -112,7 +112,7 @@ module TSOS {
             // run
             sc = new ShellCommand(this.shellRun,
                                     "run",
-                                    "<pid> - Runs specified proces.");
+                                    "<pid> - Runs specified process.");
             this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs

@@ -66,6 +66,9 @@ module TSOS {
                 case 0xA0:
                     this.loadYRegConst();
                     break;
+                case 0xAC:
+                    this.loadYRegMem();
+                    break;
                 case 0x00:
                     this.brk();
                     break;
@@ -86,7 +89,6 @@ module TSOS {
                     break;
                 default:
                     _KernelInterruptQueue.enqueue(new Interrupt(INVALID_OPCODE_IRQ, this.Pcb.pid))
-                    _MemoryManager.terminate();
                     this.isExecuting = false;
             }
         }
@@ -130,7 +132,7 @@ module TSOS {
         }
 
         public loadXRegConst(): void {
-            this.Xreg = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC), 16);
+            this.Xreg = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 1), 16);
             this.PC += 2;
         }
 
@@ -142,7 +144,7 @@ module TSOS {
         }
 
         public loadYRegConst(): void {
-            this.Yreg = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC), 16);
+            this.Yreg = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 1), 16);
             this.PC += 2;
         }
 
@@ -170,13 +172,19 @@ module TSOS {
         }
 
         public branch(): void {
-            if (this.Zflag == 0) {
-                this.PC += parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 1), 16);
-                this.PC += 2;
-                this.PC %= 256;
+            var notEqual = this.PC += parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 1), 16);
+
+            if (this.Zflag === 0) {
+                //this.PC += parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 1), 16);
+                //this.PC += 2;
+                //this.PC %= 256;
+                this.PC += notEqual;
             }
-            else {
-                this.PC += 2;
+            // else {
+            //     this.PC += 2;
+            // }
+            if (this.PC > MEMORY_SIZE) {
+                this.PC %= MEMORY_SIZE;
             }
         }
 
@@ -192,10 +200,12 @@ module TSOS {
         public sysCall(): void {
             // TODO: change the putText() to be the interrupts
             //       didn't like the passed params, so look up what the issue is
-            
+
+            //parseInt(this.Xreg.toString(), 16);
+
             if (this.Xreg === 1) {
                 //_KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSCALL_IRQ, this.Yreg.toString()));
-                _StdOut.putText(this.Yreg.toString());
+                _StdOut.putText("" + this.Yreg.toString());
             }
             else if (this.Xreg === 2) {
                 var output = "";
@@ -210,6 +220,8 @@ module TSOS {
                 //_KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSCALL_IRQ, output));
                 _StdOut.putText(output);
             }
+
+            this.PC++;
         }
     }
 }

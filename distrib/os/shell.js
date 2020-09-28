@@ -64,7 +64,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellLoad, "load", "- Loads program from User Program Input.");
             this.commandList[this.commandList.length] = sc;
             // run
-            sc = new TSOS.ShellCommand(this.shellRun, "run", "<pid> - Runs specified proces.");
+            sc = new TSOS.ShellCommand(this.shellRun, "run", "<pid> - Runs specified process.");
             this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.

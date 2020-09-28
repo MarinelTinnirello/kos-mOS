@@ -61,6 +61,9 @@ var TSOS;
                 case 0xA0:
                     this.loadYRegConst();
                     break;
+                case 0xAC:
+                    this.loadYRegMem();
+                    break;
                 case 0x00:
                     this.brk();
                     break;
@@ -81,7 +84,6 @@ var TSOS;
                     break;
                 default:
                     _KernelInterruptQueue.enqueue(new TSOS.Interrupt(INVALID_OPCODE_IRQ, this.Pcb.pid));
-                    _MemoryManager.terminate();
                     this.isExecuting = false;
             }
         }
@@ -116,7 +118,7 @@ var TSOS;
             this.PC += 3;
         }
         loadXRegConst() {
-            this.Xreg = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC), 16);
+            this.Xreg = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 1), 16);
             this.PC += 2;
         }
         loadXRegMem() {
@@ -125,7 +127,7 @@ var TSOS;
             this.PC += 3;
         }
         loadYRegConst() {
-            this.Yreg = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC), 16);
+            this.Yreg = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 1), 16);
             this.PC += 2;
         }
         loadYRegMem() {
@@ -146,13 +148,17 @@ var TSOS;
             this.PC += 3;
         }
         branch() {
-            if (this.Zflag == 0) {
-                this.PC += parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 1), 16);
-                this.PC += 2;
-                this.PC %= 256;
+            var notEqual = this.PC += parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC), 16);
+            if (this.Zflag === 0) {
+                //this.PC += 2;
+                //this.PC %= 256;
+                this.PC += notEqual;
             }
-            else {
-                this.PC += 2;
+            // else {
+            //     this.PC += 2;
+            // }
+            if (this.PC > MEMORY_SIZE) {
+                this.PC %= MEMORY_SIZE;
             }
         }
         increment() {
@@ -165,9 +171,10 @@ var TSOS;
         sysCall() {
             // TODO: change the putText() to be the interrupts
             //       didn't like the passed params, so look up what the issue is
+            //parseInt(this.Xreg.toString(), 16);
             if (this.Xreg === 1) {
                 //_KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSCALL_IRQ, this.Yreg.toString()));
-                _StdOut.putText(this.Yreg.toString());
+                _StdOut.putText("" + this.Yreg.toString());
             }
             else if (this.Xreg === 2) {
                 var output = "";
@@ -180,6 +187,7 @@ var TSOS;
                 //_KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSCALL_IRQ, output));
                 _StdOut.putText(output);
             }
+            this.PC++;
         }
     }
     TSOS.Cpu = Cpu;
