@@ -4,6 +4,9 @@
     Organizes, controls, and talks with memory.
     Here, we set the registers and availability of any given segment, as well as load our programs.
 
+    Memory segments can be considered with a "base" register (a min) and a "limit" register (a max) for
+        available addresses.  This will be important for keeping track of multiple programs in memory.
+
     (Thanks to OSDev Wiki for helping me to clear up conceptual issues)
     ------------ */
 var TSOS;

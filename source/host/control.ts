@@ -112,8 +112,6 @@ module TSOS {
             var table = document.getElementById("tableMemory") as HTMLTableElement;
             var tBody = document.createElement('tbody');
 
-            //table.style.display = 'block';
-
             // table data taken from Memory
             var row;
             var rowLabel = "0x000";
@@ -195,47 +193,14 @@ module TSOS {
 
                 table.replaceChild(tBody, table.tBodies[0]);
 
-                /**if highlighted cell, scroll into view **/
+                /** if highlighted cell, scroll into view **/
                 if (highlightCell) {
-                    highlightCell.scrollIntoView({block: `nearest`});
+                    highlightCell.scrollIntoView(true);
                 }
             }
         }
 
-        public static hostCputDisplay(): void {
-            // var opCodeMap = {"A9": {"pcNum": 1},
-            //                 "AD": {"pcNum": 2},
-            //                 "8D": {"pcNum": 2},
-            //                 "6D": {"pcNum": 2},
-            //                 "A2": {"pcNum": 1},
-            //                 "AE": {"pcNum": 2},
-            //                 "A0": {"pcNum": 1},
-            //                 "AC": {"pcNum": 2},
-            //                 "EA": {"pcNum": 0},
-            //                 "00": {"pcNum": 0},
-            //                 "EC": {"pcNum": 2},
-            //                 "D0": {"pcNum": 1},
-            //                 "EE": {"pcNum": 2},
-            //                 "FF": {"pcNum": 0}
-            //                 };
-
-            // var table = document.getElementById("tableCpu") as HTMLTableElement;
-            // var row = table.rows[1];
-            // var currOp = _CPU.IR.toString(16).toLocaleUpperCase();
-
-            // /** if invalid op code, exit **/
-            // if (!opCodeMap[currOp]) {
-            //     return;
-            // }
-
-            // // ... grabs info from CPU
-            // row.cells[0].innerHTML = (_CPU.PC - opCodeMap[currOp].pcNum - 1).toString();
-            // row.cells[1].innerHTML = currOp;
-            // row.cells[2].innerHTML = _CPU.Acc.toString(16).toLocaleUpperCase();
-            // row.cells[3].innerHTML = _CPU.Xreg.toString(16).toLocaleUpperCase();
-            // row.cells[4].innerHTML = _CPU.Yreg.toString(16).toLocaleUpperCase();
-            // row.cells[5].innerHTML = _CPU.Zflag.toString(16).toLocaleUpperCase();
-
+        public static hostCpuDisplay(): void {
             var table = document.getElementById("tableCpu") as HTMLTableElement;
 
             table.deleteRow(-1);
@@ -268,15 +233,42 @@ module TSOS {
             cell.innerHTML = _CPU.Zflag.toString(16).toLocaleUpperCase();
         }
 
-        // TODO: don't do this for Project 2, you're gonna need to set up a Scheduler
+        // TODO: change to allow for multiple PCBs for Project 3
         // public static hostPcbDisplay(): void {
-        //     var table = document.getElementById("tablePcb") as HTMLTableElement;
-        //     var tBody = document.createElement("tbody");
+        //     var table = document.getElementById("tableCpu") as HTMLTableElement;
 
-        //     table.style.display = 'block';
-        //     table.style.height = '200px';
+        //     table.deleteRow(-1);
 
-        //     var row;
+        //     var row = table.insertRow(-1);
+        //     var cell;
+
+        //     // PID
+        //     cell = row.insertCell();
+        //     cell.innerHTML = PROCESS_LIST.pop().pid.toString(16).toLocaleUpperCase();
+        //     // PC
+        //     cell = row.insertCell();
+        //     cell.innerHTML = PROCESS_LIST.pop().PC.toString(16).toLocaleUpperCase();
+        //     // Acc
+        //     cell = row.insertCell();
+        //     cell.innerHTML = PROCESS_LIST.pop().Acc.toString(16).toLocaleUpperCase();
+        //     // IR
+        //     cell = row.insertCell();
+        //     cell.innerHTML = PROCESS_LIST.pop().IR.toString(16).toLocaleUpperCase();
+        //     // X Reg
+        //     cell = row.insertCell();
+        //     cell.innerHTML = PROCESS_LIST.pop().Xreg.toString(16).toLocaleUpperCase();
+        //     // Y Reg
+        //     cell = row.insertCell();
+        //     cell.innerHTML = PROCESS_LIST.pop().Yreg.toString(16).toLocaleUpperCase();
+        //     // Z Flag
+        //     cell = row.insertCell();
+        //     cell.innerHTML = PROCESS_LIST.pop().Zflag.toString(16).toLocaleUpperCase();
+        //     // Priority
+        //     cell = row.insertCell();
+        //     cell.innerHTML = PROCESS_LIST.pop().priority.toString(16).toLocaleUpperCase();
+        //     // State
+        //     cell = row.insertCell();
+        //     cell.innerHTML = PROCESS_LIST.pop().state;
         // }
 
         //

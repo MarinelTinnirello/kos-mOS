@@ -10,9 +10,6 @@
      Virtual can be mapped to any Physical address, allowing each program or segment to have their own address.
         This helps free up some of the fragmentation issues.
 
-     Memory segments can be considered with a "base" register (a min) and a "limit" register (a max) for
-        available addresses.
-
     (Thanks to OSDev Wiki for helping me to clear up conceptual issues :) )
     ------------ */
 
@@ -44,7 +41,7 @@ module TSOS {
 
             /** if the physical address >= segment's limit or the virtual address is less than 0,
              * throw an invalid address interrupt on the CPU's PCB pid, terminate the program, and return false
-             * else, set the memory, using the physical address as the index, to be the hex pair and return true
+             * else, set the memory, using the physical address as the index, to be the hex pair, and return true
             **/
             if (p_addr >= segment.limit || v_addr < 0) {
                 _KernelInterruptQueue.enqueue(new Interrupt(INVALID_ADDR_IRQ, _CPU.Pcb.pid))
