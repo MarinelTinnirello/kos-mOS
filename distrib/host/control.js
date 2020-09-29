@@ -159,6 +159,7 @@ var TSOS;
                     p_addr++;
                 }
                 table.replaceChild(tBody, table.tBodies[0]);
+                // TODO: maybe throw this back in
                 // /** if highlighted cell, scroll into view **/
                 // if (highlightCell) {
                 //     highlightCell.scrollIntoView(true);
@@ -179,11 +180,6 @@ var TSOS;
             // IR
             cell = row.insertCell();
             cell.innerHTML = _Memory.memory[_CPU.PC].toString().toLocaleUpperCase();
-            // if (_CPU.isExecuting) {
-            //     cell.innerHTML = _Memory.memory[_CPU.PC].toString();
-            // } else {
-            //     cell.innerHTML = "0";
-            // }
             // X Reg
             cell = row.insertCell();
             cell.innerHTML = _CPU.Xreg.toString(16).toLocaleUpperCase();

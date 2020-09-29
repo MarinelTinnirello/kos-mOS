@@ -23,7 +23,6 @@ var TSOS;
             **/
             if (p_addr >= segment.limit || v_addr < 0) {
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(INVALID_ADDR_IRQ, _CPU.Pcb.pid));
-                _MemoryManager.terminate();
                 return;
             }
             else {
@@ -38,7 +37,6 @@ var TSOS;
             **/
             if (p_addr >= segment.limit || v_addr < 0) {
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(INVALID_ADDR_IRQ, _CPU.Pcb.pid));
-                _MemoryManager.terminate();
                 return false;
             }
             else {

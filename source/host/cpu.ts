@@ -45,46 +45,46 @@ module TSOS {
 
             // ... execute
             switch(this.IR) {
-                case 0xA9:
+                case 0xA9:                  // LDA
                     this.loadAccConst();
                     break;
-                case 0xAD:
+                case 0xAD:                  // LDA
                     this.loadAccMem();
                     break;
-                case 0x8D:
+                case 0x8D:                  // STA
                     this.storeAccMem();
                     break;
-                case 0x6D:
+                case 0x6D:                  // ADC
                     this.addWithCarry();
                     break;
-                case 0xA2:
+                case 0xA2:                  // LDX
                     this.loadXRegConst();
                     break;
-                case 0xAE:
+                case 0xAE:                  // LDX
                     this.loadXRegMem();
                     break;
-                case 0xA0:
+                case 0xA0:                  // LDY
                     this.loadYRegConst();
                     break;
-                case 0xAC:
+                case 0xAC:                  // LDY
                     this.loadYRegMem();
                     break;
-                case 0x00:
+                case 0x00:                  // BRK
                     this.brk();
                     break;
-                case 0xEA:
+                case 0xEA:                  // NOP
                     this.noOp();
                     break;
-                case 0xEC:
+                case 0xEC:                  // CPX
                     this.compare();
                     break;
-                case 0xD0:
+                case 0xD0:                  // BNE
                     this.branch();
                     break;
-                case 0xEE:
+                case 0xEE:                  // INC
                     this.increment();
                     break;
-                case 0xFF:
+                case 0xFF:                  // SYS
                     this.sysCall();
                     break;
                 default:
@@ -110,24 +110,37 @@ module TSOS {
         }
 
         public loadAccMem(): void {
-            var addr = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 2), 16);
+            var swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 1);
+
+            swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 2) + swapStr;
+
+            var addr = parseInt(swapStr, 16);
 
             this.Acc = parseInt(_MemoryAccessor.read(this.Pcb.segment, addr), 16);
             this.PC += 3;
         }
 
         public storeAccMem(): void {
-            var addr = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 2), 16);
+            var swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 1);
 
-            _MemoryAccessor.write(this.Pcb.segment, addr, this.Acc.toString(16));
-            this.Acc = parseInt(_MemoryAccessor.read(this.Pcb.segment, addr), 16);
+            swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 2) + swapStr;
+
+            var addr = parseInt(swapStr, 16);
+            var val = this.Acc.toString(16);
+
+            _MemoryAccessor.write(this.Pcb.segment,addr, val);
             this.PC += 3;
         }
 
         public addWithCarry(): void {
-            var addr = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 2), 16);
+            var swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 1);
 
-            this.Acc = parseInt(_MemoryAccessor.read(this.Pcb.segment, addr), 16);
+            swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 2) + swapStr;
+
+            var addr = parseInt(swapStr, 16);
+            var val = _MemoryAccessor.read(this.Pcb.segment, addr);
+
+            this.Acc += parseInt(val, 16);
             this.PC += 3;
         }
 
@@ -137,7 +150,11 @@ module TSOS {
         }
 
         public loadXRegMem(): void {
-            var addr = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 2), 16);
+            var swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 1);
+
+            swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 2) + swapStr;
+
+            var addr = parseInt(swapStr, 16);
 
             this.Xreg = parseInt(_MemoryAccessor.read(this.Pcb.segment, addr), 16);
             this.PC += 3;
@@ -149,7 +166,11 @@ module TSOS {
         }
 
         public loadYRegMem(): void {
-            var addr = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 2), 16);
+            var swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 1);
+
+            swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 2) + swapStr;
+
+            var addr = parseInt(swapStr, 16);
 
             this.Yreg = parseInt(_MemoryAccessor.read(this.Pcb.segment, addr), 16);
             this.PC += 3;
@@ -165,43 +186,52 @@ module TSOS {
         }
 
         public compare(): void {
-            var addr = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 2), 16);
+            var swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 1);
 
-            this.Zflag = parseInt(_MemoryAccessor.read(this.Pcb.segment, addr), 16) === this.Xreg ? 1 : 0;
+            swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 2) + swapStr;
+
+            var addr = parseInt(swapStr, 16);
+            var compareByte = _MemoryAccessor.read(this.Pcb.segment, addr);
+
+            if (this.Xreg == parseInt(compareByte.toString(), 16)) {
+                this.Zflag = 1;
+            } else {
+                this.Zflag = 0;
+            }
+
             this.PC += 3;
         }
 
         public branch(): void {
-            var notEqual = this.PC += parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 1), 16);
-
-            if (this.Zflag === 0) {
-                //this.PC += parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 1), 16);
-                //this.PC += 2;
-                //this.PC %= 256;
-                this.PC += notEqual;
+            if (this.Zflag == 0) {
+                this.PC += parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 1), 16);
+                this.PC += 2;
+                this.PC %= 256;
             }
-            // else {
-            //     this.PC += 2;
-            // }
-            if (this.PC > MEMORY_SIZE) {
-                this.PC %= MEMORY_SIZE;
+            else {
+                this.PC += 2;
             }
         }
 
         public increment(): void {
-            var addr = parseInt(_MemoryAccessor.read(this.Pcb.segment, this.PC + 2), 16);
-            var val = parseInt(_MemoryAccessor.read(this.Pcb.segment, addr), 16);
+            var swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 1);
 
-            val++;
-            _MemoryAccessor.write(this.Pcb.segment, addr, val.toString(16));
+            swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 2) + swapStr;
+
+            var addr = parseInt(swapStr, 16);
+            var incByte = parseInt(_MemoryAccessor.read(this.Pcb.segment, addr));
+
+            incByte++;
+
+            var hexByte = incByte.toString(16);
+
+            _MemoryAccessor.write(this.Pcb.segment, addr, hexByte);
             this.PC += 3;
         }
 
         public sysCall(): void {
             // TODO: change the putText() to be the interrupts
             //       didn't like the passed params, so look up what the issue is
-
-            //parseInt(this.Xreg.toString(), 16);
 
             if (this.Xreg === 1) {
                 //_KernelInterruptQueue.enqueue(new TSOS.Interrupt(SYSCALL_IRQ, this.Yreg.toString()));

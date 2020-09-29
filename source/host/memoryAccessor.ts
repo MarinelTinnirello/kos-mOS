@@ -27,7 +27,6 @@ module TSOS {
             **/
             if (p_addr >= segment.limit || v_addr < 0) {
                 _KernelInterruptQueue.enqueue(new Interrupt(INVALID_ADDR_IRQ, _CPU.Pcb.pid))
-                _MemoryManager.terminate();
 
                 return;
             }
@@ -45,7 +44,6 @@ module TSOS {
             **/
             if (p_addr >= segment.limit || v_addr < 0) {
                 _KernelInterruptQueue.enqueue(new Interrupt(INVALID_ADDR_IRQ, _CPU.Pcb.pid))
-                _MemoryManager.terminate();
 
                 return false;
             }
