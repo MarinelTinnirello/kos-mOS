@@ -23,16 +23,12 @@ const KEYBOARD_IRQ: number = 1;
 const INVALID_ADDR_IRQ: number = 2;          // invalid memory address interrupt
 const INVALID_OPCODE_IRQ: number = 3;        // invalid op code interrupt
 const TERMINATE_PROCESS_IRQ: number = 4;     // terminate process interrupt
-const SYSCALL_IRQ: number = 5;               // system call intterupt
+const SYSCALL_IRQ: number = 5;               // system call interrupt
+const CONTEXT_SWITCH_IRQ: number = 6;        // context switch interrupt
 
 // Memory
 const MEMORY_SIZE = 256;      // size of a memory segment
 const NUM_OF_SEGMENTS = 3;    // number of memory segments
-
-// Processes
-const PROCESS_LIST = [];      // list of processes
-//const PROCESS_QUEUE = [];
-const CURR_PROCESS = null;    // current process in the list
 
 //
 // Global Variables
@@ -43,8 +39,13 @@ var _PCB: TSOS.Pcb;        // Utilize TypeScript's type annotation system to ens
 var _Memory: TSOS.Memory;  // Utilize TypeScript's type annotation system to ensure that _Memory is an instance of the Memory class.
 var _MemoryAccessor: TSOS.MemoryAccessor;    // Utilize TypeScript's type annotation system to ensure that _MemoryAccessor is an instance of the MemoryAccessor class.
 var _MemoryManager: TSOS.MemoryManager;      // Utilize TypeScript's type annotation system to ensure that _MemoryManager is an instance of the MemoryManager class.
+var _Scheduler: TSOS.Scheduler;              // Utilize TypeScript's type annotation system to ensure that _Scheduler is an instance of the Scheduler class.
 
 var _OSclock: number = 0;  // Page 23.
+
+// Processes
+var _ResidentList = [];    // list of processes
+var _ReadyQueue = [];      // queue of ready processes
 
 // Modes
 var _Mode: number = 0;     // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.

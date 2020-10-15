@@ -15,7 +15,7 @@ module TSOS {
     export class Pcb {
 
         constructor(public pid: number = 0,             // process ID
-                    public priority: number = 0,        // priority of ID (matters for Project 3)
+                    public priority: number = 0,        // priority of ID
                     public PC: number = 0,              // program counter
                     public IR: number = -1,             // intstruction register
                     public Acc: number = 0,             // accumulator
@@ -25,7 +25,7 @@ module TSOS {
                     public waitCycles: number = 0,      // how many cycles it had to wait (will matter for Fit algorithms)
                     public executeCycles: number = 0,   // how many cycles it had to execute (will matter for Fit algorithms)
                     public segment = {},                // segment object
-                    public state: string = "new") {     // state of PCB (will matter when there's more than 1 program)
+                    public state: string = "new") {     // state of PCB
         }
     }
 }

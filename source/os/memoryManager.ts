@@ -66,7 +66,7 @@ module TSOS {
             pcb.priority = parseInt(priority) || 0;
             pcb.state = "process";
             // push current PCB into process list
-            PROCESS_LIST.push(pcb);
+            _ResidentList.push(pcb);
 
             return pcb;
         }
@@ -84,7 +84,7 @@ module TSOS {
             }
 
             // TODO: change to CURR_PROCESS later
-            _CPU.Pcb = PROCESS_LIST[0];
+            _CPU.Pcb = _ResidentList[0];
             _CPU.isExecuting = true;
         }
 
