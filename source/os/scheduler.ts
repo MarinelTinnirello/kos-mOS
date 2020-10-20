@@ -25,7 +25,7 @@ module TSOS {
         //
         // Process handling
         //
-        public scheduleProcess() {
+        public scheduleProcess(): void {
             this.currProcess = _ReadyQueue.find(element => element.state == "running");
 
             switch(this.currSchedulerType) {
@@ -36,7 +36,12 @@ module TSOS {
                     break;
                 case "fcfs":    // First come, first serve
                     _Kernel.krnTrace("First come, first serve scheduling");
-                    // we can get away with not having a dedicated function so long as we have an unreachable quantum
+                    /* We can get away with not having a dedicated function so long as we have an unreachable quantum
+                     * in JS, there are a few ways to do this:
+                     * "Infinity", "Number.MAX_SAFE_INTEGER"
+                     * I just figured "MAX_SAFE_INTEGER" was the smartest way that also keeps in-line with our limited
+                     * amount of memory
+                    */
                     this.roundRobin(Number.MAX_SAFE_INTEGER);
 
                     break;
@@ -48,7 +53,7 @@ module TSOS {
             }
         }
 
-        public runNextProcess() {
+        public runNextProcess(): void {
             /** check if there's a process currently running **/
             if ((!this.currProcess) || (this.currProcess.pid !== _ReadyQueue[0]))
             {
@@ -57,9 +62,36 @@ module TSOS {
             }
         }
 
-        public loadToReadyQueue(pcb: Pcb) {
+        public terminateCurrProcess(currProcess: Pcb): void {
+            currProcess.state = "terminated";
+            _ReadyQueue = _ReadyQueue.filter(element => element.pid != currProcess.pid);
+            _MemoryManager.isAvailable[currProcess.segment.index] = true;
+
+            _StdOut.advanceLine();
+            _StdOut.putText(`Process: ${currProcess.pid} terminated.`);
+            _StdOut.advanceLine();
+            _StdOut.putText(`Turnaround time: ${currProcess.executeCycles} cycles.`);
+            _StdOut.advanceLine();
+            _StdOut.putText(`Wait time: ${currProcess.waitCycles} cycles.`);
+            _StdOut.advanceLine();
+            _OsShell.putPrompt();
+        }
+
+        public loadToReadyQueue(pcb: Pcb): void {
             pcb.state = "ready";
             _ReadyQueue.push(pcb);
+        }
+        
+        public updateCyclesTaken(): void {
+            _Kernel.krnTrace("Updating turnaround and wait time...");
+
+            for (var pcb of _ResidentList) {
+                pcb.executeCycles++;
+
+                if (pcb.state === 'ready') {
+                    pcb.waitCycles++;
+                }
+            }
         }
 
         //
@@ -69,7 +101,7 @@ module TSOS {
          * so there's no reason to sort, as they're already in their order of arrival 
         ****/
 
-        public roundRobin(quantum: number) {
+        public roundRobin(quantum: number): void {
             /** if process in the ready queue lines up with our current process's PID,
              * reorder ready queue and get ready to run next process
              * else, reset quantum 
@@ -90,7 +122,7 @@ module TSOS {
             this.runNextProcess();
         }
 
-        public priority() {
+        public priority(): void {
             _ReadyQueue.sort((a, b) => (b.priority <= a.priority) ? 1 : -1);
             this.runNextProcess();
         }

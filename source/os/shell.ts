@@ -493,7 +493,7 @@ module TSOS {
             if (args.length > 0) {
                 // parse the pid arguement and push it into a list of processes
                 var pid = parseInt(args[0]);
-                var pcb = PROCESS_LIST.find(val => val.pid == pid);
+                var pcb = _ResidentList.find(val => val.pid == pid);
                 
                 /** check whether there's anything in the PCB or if it's being ran or terminated **/
                 if (!pcb) {
