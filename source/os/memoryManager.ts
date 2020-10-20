@@ -13,13 +13,13 @@
 module TSOS {
 
     export class MemoryManager {
-        constructor(public registers: any[] = [], 
-                    public isAvailable: boolean[] = []) {
+        constructor(public registers: any[] = [],               // registers for the given segment
+                    public isAvailable: boolean[] = []) {       // availability of segment
         }
 
         public init(): void {
             /*** loops through number of memory segments to assign availibility and register attributes ***/
-            for (var i = 0; i < NUM_OF_SEGMENTS; i++) {
+            for (var i = 0; i < MEMORY_SIZE / NUM_OF_SEGMENTS; i++) {
                 this.isAvailable[i] = true;
                 this.registers[i] = { index: i,
                                       base: MEMORY_SIZE * i,
@@ -62,13 +62,21 @@ module TSOS {
             // Set availability for current segment and PCB
             this.isAvailable[segment] = false;
             pcb.segment = this.registers[segment];
-            // Set priority for current process (won't affect us right now, but it's futureproofing for Project 3)
+            // Set priority for current process
             pcb.priority = parseInt(priority) || 0;
             pcb.state = "process";
             // push current PCB into process list
             _ResidentList.push(pcb);
 
             return pcb;
+        }
+
+        public clearAllMem(ignoreProcesses): void {
+            for (var segment of this.registers) {
+                if (!ignoreProcesses.includes(segment.index)) {
+                    _MemoryAccessor.reset(segment);
+                }
+            }
         }
 
         // TODO: might want to throw run() and terminate() into another file come Project 3

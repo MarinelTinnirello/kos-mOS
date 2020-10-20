@@ -18,6 +18,9 @@ module TSOS {
         public p_addr;
         public v_addr;
 
+        constructor() {
+        }
+
         public read(segment, v_addr): string {
             var p_addr = v_addr + segment.base;
 
@@ -43,7 +46,8 @@ module TSOS {
              * else, set the memory, using the physical address as the index, to be the hex pair, and return true
             **/
             if (p_addr >= segment.limit || v_addr < 0) {
-                _KernelInterruptQueue.enqueue(new Interrupt(INVALID_ADDR_IRQ, _CPU.Pcb.pid))
+                _KernelInterruptQueue.enqueue(new Interrupt(INVALID_ADDR_IRQ, _CPU.Pcb.pid));
+                _MemoryManager.terminate();
 
                 return false;
             }

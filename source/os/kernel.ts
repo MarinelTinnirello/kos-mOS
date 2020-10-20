@@ -167,6 +167,9 @@ module TSOS {
                 // case SYSCALL_IRQ:                     // Prints out characters made from System Call function
                 //     _StdOut.putText(params);
                 //     break;
+                case CONTEXT_SWITCH_IRQ:               // Switches context to current process
+                    _MemoryManager.run(params[0]);
+                    break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
             }

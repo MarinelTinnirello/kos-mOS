@@ -62,7 +62,7 @@ module TSOS {
             }
         }
 
-        public terminateCurrProcess(currProcess: Pcb): void {
+        public terminateCurrProcess(currProcess): void {
             currProcess.state = "terminated";
             _ReadyQueue = _ReadyQueue.filter(element => element.pid != currProcess.pid);
             _MemoryManager.isAvailable[currProcess.segment.index] = true;

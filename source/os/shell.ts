@@ -115,6 +115,42 @@ module TSOS {
                                     "<pid> - Runs specified process.");
             this.commandList[this.commandList.length] = sc;
 
+            // runall
+            sc = new ShellCommand(this.shellRunAll,
+                                    "runall",
+                                    "Runs all processes in 'process' state.");
+            this.commandList[this.commandList.length] = sc;
+
+            // clearmem
+            sc = new ShellCommand(this.shellClearMem,
+                                    "clearmem",
+                                    "Clears all memory segments. (Ignores running processes.)");
+            this.commandList[this.commandList.length] = sc;
+
+            // ps
+            sc = new ShellCommand(this.shellPs,
+                                    "ps",
+                                    "Lists running processes and their PIDs.");
+            this.commandList[this.commandList.length] = sc;
+
+            // kill
+            sc = new ShellCommand(this.shellKill,
+                                    "kill",
+                                    "<pid> - Kills specified process.");
+            this.commandList[this.commandList.length] = sc;
+
+            // kill
+            sc = new ShellCommand(this.shellKillAll,
+                                    "killall",
+                                    "Kills all processes.");
+            this.commandList[this.commandList.length] = sc;
+
+            // quantum
+            sc = new ShellCommand(this.shellQuantum,
+                                    "quantum",
+                                    "<int> - Sets quantum for Round Robin scheduling.");
+            this.commandList[this.commandList.length] = sc;
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -316,6 +352,9 @@ module TSOS {
                     case "load":
                         _StdOut.putText("Loads program from User Program Input.");
                         break;
+                    case "run":
+                        _StdOut.putText("Runs specified process.");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -455,8 +494,6 @@ module TSOS {
 
             // TypeScript doesn't have ".value" on elements
             var program = (document.getElementById("taProgramInput") as HTMLTextAreaElement).value.trim().toLocaleUpperCase();
-            // put extra split() here cause we need it for test()
-            //var programArr = program.split(" ");
             var programArr = program.replace(/\s/g, "");
 
             /** Checks if program in text area is valid **/
@@ -508,6 +545,79 @@ module TSOS {
                 }                
             } else {
                 _StdOut.putText("Usage: run <pid>  Please supply a pid.");
+            }
+        }
+
+        public shellRunAll(args): void {
+            var residentList = _ResidentList.filter(element => element.state == 'process');
+            var pidMap = residentList.map(element => element.pid);
+
+            for (var pid of pidMap) {
+                var pcb = _ResidentList.find(element => element.pid == pid);
+
+                _StdOut.putText(`Running process.  PID: ${pid}`);
+                _StdOut.advanceLine();
+                _Scheduler.loadToReadyQueue(pcb);
+            }
+        }
+
+        public shellPs(args): void {
+            for (var process of _ResidentList) {
+                _StdOut.putText(`${process.pid}: ${process.state}`);
+                _StdOut.advanceLine();
+            }
+        }
+
+        public shellClearMem(args): void {
+            // for ignoring running processes
+            var ignoreProcesses = [];
+
+            /*** for all processes in resident list
+             * if process's state isn't terminated or running, create terminate interrupt 
+             * else if process's state is running, push to ignore process
+            ***/
+            for (var pcb of _ResidentList) {
+                if ((pcb.state != 'terminated') && (pcb.state != 'running')) {
+                    _KernelInputQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+                } else if (pcb.state == 'running') {
+                    ignoreProcesses.push(pcb.segment.index);
+                }
+            }
+        }
+
+        public shellKill(args): void {
+            /** check if there's a pid arguement to pass **/
+            if (args.length > 0) {
+                var pid = parseInt(args[0]);
+                var pcb = _ReadyQueue.find(element => element.pid == args[0]);
+                
+                if (pcb) {
+                    _StdOut.putText(`Process ${pid} has been terminated.`);
+                    _KernelInputQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+                } else {
+                    _StdOut.putText(`Process ${pid} not found.  Please supply a valid pid.`);
+                }
+            } else {
+                _StdOut.putText("Usage: kill <pid>  Please supply a pid.");
+            }
+        }
+
+        public shellKillAll(args): void {
+            for (var pcb of _ReadyQueue) {
+                _KernelInputQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+            }
+        }
+
+        public shellQuantum(args): void {
+            if (args.length > 0) {
+                if ((parseInt(args[0]) <= 0) || isNaN(args[0])) {
+                    _StdOut.putText(`Quantum: ${args[0]} is invalid.`);
+                }
+
+                _StdOut.putText(`Quantum: ${args[0]}.`);
+                _Scheduler.quantum = parseInt(args[0]);
+            } else {
+                _StdOut.putText("Usage: kill <pid>  Please supply a integer.");
             }
         }
     }
