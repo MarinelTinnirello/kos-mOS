@@ -40,5 +40,15 @@ module TSOS {
             }
             return retVal;
         }
+
+        public peek() {
+            var retVal = null;
+
+            if (this.q.length > 0) {
+                retVal += this.q[0];
+            }
+
+            return retVal;
+        }
     }
 }

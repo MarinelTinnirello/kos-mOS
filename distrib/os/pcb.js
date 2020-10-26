@@ -7,21 +7,23 @@
         - "ready"           // ready to be pushed into process list (will be important for Scheduler)
         - "running"         // process is currently running
         - "process"         // process has been pushed into process list
-        - "terminate"       // process has been terminated
+        - "terminated"      // process has been terminated
+    
+    PID increments per loaded input.
     ------------ */
 var TSOS;
 (function (TSOS) {
     class Pcb {
-        constructor(pid = 0, // process ID
-        priority = 0, // priority of ID (matters for Project 3)
+        constructor(pid = _PidCount++, // process ID
+        priority = 0, // priority of ID
         PC = 0, // program counter
         IR = -1, // intstruction register
         Acc = 0, // accumulator
         Xreg = 0, // X register
         Yreg = 0, // Y register
         Zflag = 0, // Z flag
-        waitCycles = 0, // how many cycles it had to wait (will matter for Fit algorithms)
-        executeCycles = 0, // how many cycles it had to execute (will matter for Fit algorithms)
+        waitCycles = 0, // how many cycles it had to wait
+        executeCycles = 0, // how many cycles it had to execute
         segment = {}, // segment object
         state = "new") {
             this.pid = pid;

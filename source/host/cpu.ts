@@ -17,7 +17,7 @@ module TSOS {
 
         constructor(public PC: number = 0,
                     public Acc: number = 0,
-                    public IR: number = 0,
+                    public IR: number = 0x00,
                     public Xreg: number = 0,
                     public Yreg: number = 0,
                     public Zflag: number = 0,
@@ -28,6 +28,7 @@ module TSOS {
         public init(): void {
             this.PC = 0;
             this.Acc = 0;
+            this.IR = 0x00;
             this.Xreg = 0;
             this.Yreg = 0;
             this.Zflag = 0;
@@ -93,7 +94,20 @@ module TSOS {
             }
         }
 
+        public savePcbState(): void {
+            if (this.Pcb) {
+                this.Pcb.PC = this.PC;
+                this.Pcb.Acc = this.Acc;
+                this.Pcb.Xreg = this.Xreg;
+                this.Pcb.Yreg = this.Yreg;
+                this.Pcb.Zflag = this.Zflag;
+            }
+        }
+
         public updatePcb(pcb: Pcb): void {
+            this.savePcbState();
+
+            this.Pcb = pcb;
             this.PC = pcb.PC;
             this.Acc = pcb.Acc;
             this.Xreg = pcb.Xreg;
@@ -181,8 +195,9 @@ module TSOS {
         }
 
         public brk(): void {            
+            this.savePcbState();
             this.isExecuting = false;
-            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, this.Pcb.pid));
+            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(KILL_PROCESS_IRQ, this.Pcb.pid));
         }
 
         public compare(): void {

@@ -139,7 +139,7 @@ module TSOS {
                                     "<pid> - Kills specified process.");
             this.commandList[this.commandList.length] = sc;
 
-            // kill
+            // killall
             sc = new ShellCommand(this.shellKillAll,
                                     "killall",
                                     "Kills all processes.");
@@ -355,6 +355,24 @@ module TSOS {
                     case "run":
                         _StdOut.putText("Runs specified process.");
                         break;
+                    case "runall":
+                        _StdOut.putText("Runs all processes in 'process' state.");
+                        break;
+                    case "clearmem":
+                        _StdOut.putText("Clears all memory segments. (Ignores running processes.)");
+                        break;
+                    case "ps":
+                        _StdOut.putText("Lists running processes and their PIDs.");
+                        break;
+                    case "kill":
+                        _StdOut.putText("Kills specified process.");
+                        break;
+                    case "killall":
+                        _StdOut.putText("Kills all processes.");
+                        break;
+                    case "quantum":
+                        _StdOut.putText("Sets specified quantum for Round Robin scheduling.");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -541,23 +559,29 @@ module TSOS {
                     _StdOut.putText(`Usage: ${pid} already ran and has been terminated.`);
                 } else {
                     _StdOut.putText(`Running process.  PID: ${pid}`);
-                    _MemoryManager.run(pcb);
-                }                
+                    _StdOut.advanceLine();
+                    _Scheduler.loadToReadyQueue(pcb);
+                    _CPU.isExecuting = true;
+                }
             } else {
                 _StdOut.putText("Usage: run <pid>  Please supply a pid.");
             }
         }
 
         public shellRunAll(args): void {
-            var residentList = _ResidentList.filter(element => element.state == 'process');
+            var residentList = _ResidentList.filter(element => element.state == "process");
             var pidMap = residentList.map(element => element.pid);
 
             for (var pid of pidMap) {
-                var pcb = _ResidentList.find(element => element.pid == pid);
+                var pcb: Pcb = _ResidentList.find(element => element.pid == pid);
 
-                _StdOut.putText(`Running process.  PID: ${pid}`);
+                _StdOut.putText(`Running process.  PID: ${pcb.pid}`);
                 _StdOut.advanceLine();
                 _Scheduler.loadToReadyQueue(pcb);
+            }
+
+            if (_Scheduler.currProcess !== null || _ReadyQueue.length > 0) {
+                _CPU.isExecuting = true;
             }
         }
 
@@ -577,12 +601,15 @@ module TSOS {
              * else if process's state is running, push to ignore process
             ***/
             for (var pcb of _ResidentList) {
-                if ((pcb.state != 'terminated') && (pcb.state != 'running')) {
-                    _KernelInputQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
-                } else if (pcb.state == 'running') {
+                if ((pcb.state != "terminated") && (pcb.state != "running")) {
+                    _KernelInputQueue.enqueue(new Interrupt(KILL_PROCESS_IRQ, [pcb]));
+                    //_Scheduler.terminateCurrProcess(pcb.pid);
+                } else if (pcb.state == "running") {
                     ignoreProcesses.push(pcb.segment.index);
                 }
             }
+
+            _MemoryManager.clearAllMem(ignoreProcesses);
         }
 
         public shellKill(args): void {
@@ -593,7 +620,7 @@ module TSOS {
                 
                 if (pcb) {
                     _StdOut.putText(`Process ${pid} has been terminated.`);
-                    _KernelInputQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+                    _KernelInputQueue.enqueue(new Interrupt(KILL_PROCESS_IRQ, [pcb]));
                 } else {
                     _StdOut.putText(`Process ${pid} not found.  Please supply a valid pid.`);
                 }
@@ -604,7 +631,7 @@ module TSOS {
 
         public shellKillAll(args): void {
             for (var pcb of _ReadyQueue) {
-                _KernelInputQueue.enqueue(new Interrupt(TERMINATE_PROCESS_IRQ, [pcb]));
+                _KernelInputQueue.enqueue(new Interrupt(KILL_PROCESS_IRQ, [pcb]));
             }
         }
 

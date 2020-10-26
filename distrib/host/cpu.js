@@ -13,7 +13,7 @@
 var TSOS;
 (function (TSOS) {
     class Cpu {
-        constructor(PC = 0, Acc = 0, IR = 0, Xreg = 0, Yreg = 0, Zflag = 0, isExecuting = false, Pcb = null) {
+        constructor(PC = 0, Acc = 0, IR = 0x00, Xreg = 0, Yreg = 0, Zflag = 0, isExecuting = false, Pcb = null) {
             this.PC = PC;
             this.Acc = Acc;
             this.IR = IR;
@@ -26,6 +26,7 @@ var TSOS;
         init() {
             this.PC = 0;
             this.Acc = 0;
+            this.IR = 0x00;
             this.Xreg = 0;
             this.Yreg = 0;
             this.Zflag = 0;
@@ -87,7 +88,18 @@ var TSOS;
                     this.isExecuting = false;
             }
         }
+        savePcbState() {
+            if (this.Pcb) {
+                this.Pcb.PC = this.PC;
+                this.Pcb.Acc = this.Acc;
+                this.Pcb.Xreg = this.Xreg;
+                this.Pcb.Yreg = this.Yreg;
+                this.Pcb.Zflag = this.Zflag;
+            }
+        }
         updatePcb(pcb) {
+            this.savePcbState();
+            this.Pcb = pcb;
             this.PC = pcb.PC;
             this.Acc = pcb.Acc;
             this.Xreg = pcb.Xreg;
@@ -150,8 +162,9 @@ var TSOS;
             this.PC++;
         }
         brk() {
+            this.savePcbState();
             this.isExecuting = false;
-            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, this.Pcb.pid));
+            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(KILL_PROCESS_IRQ, this.Pcb.pid));
         }
         compare() {
             var swapStr = _MemoryAccessor.read(this.Pcb.segment, this.PC + 1);

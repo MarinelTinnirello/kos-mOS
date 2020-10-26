@@ -22,9 +22,10 @@ const TIMER_IRQ: number = 0;  // Pages 23 (timer), 9 (interrupts), and 561 (inte
 const KEYBOARD_IRQ: number = 1;
 const INVALID_ADDR_IRQ: number = 2;          // invalid memory address interrupt
 const INVALID_OPCODE_IRQ: number = 3;        // invalid op code interrupt
-const TERMINATE_PROCESS_IRQ: number = 4;     // terminate process interrupt
+const TERMINATE_PROCESS_IRQ: number = 4;     // terminate process from CPU interrupt
 const SYSCALL_IRQ: number = 5;               // system call interrupt
-const CONTEXT_SWITCH_IRQ: number = 6;        // context switch interrupt
+const KILL_PROCESS_IRQ: number = 6;          // terminate process interrupt
+const CONTEXT_SWITCH_IRQ: number = 7;        // context switch interrupt
 
 // Memory
 const MEMORY_SIZE = 256;      // size of a memory segment
@@ -44,8 +45,10 @@ var _Scheduler: TSOS.Scheduler;              // Utilize TypeScript's type annota
 var _OSclock: number = 0;  // Page 23.
 
 // Processes
+var _PidCount = 0;         // counts PIDs over runtime
 var _ResidentList = [];    // list of processes
-var _ReadyQueue = [];      // queue of ready processes
+var _ReadyQueue = [];      // list of processes ready to be ran
+//var _ReadyQueue: TSOS.Queue = new TSOS.Queue();      // queue of ready processes
 
 // Modes
 var _Mode: number = 0;     // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
@@ -80,7 +83,7 @@ var _SarcasticMode: boolean = false;
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver: TSOS.DeviceDriverKeyboard  = null;
 
-var _hardwareClockID: number = null;
+var _hardwareClockID: any = null;
 
 // For testing (and enrichment)...
 var Glados: any = null;  // This is the function Glados() in glados-ip*.js http://alanclasses.github.io/TSOS/test/ .

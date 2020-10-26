@@ -22,8 +22,8 @@ module TSOS {
             for (var i = 0; i < MEMORY_SIZE / NUM_OF_SEGMENTS; i++) {
                 this.isAvailable[i] = true;
                 this.registers[i] = { index: i,
-                                      base: MEMORY_SIZE * i,
-                                      limit: MEMORY_SIZE * (i + 1) 
+                                        base: MEMORY_SIZE * i,
+                                        limit: MEMORY_SIZE * (i + 1) 
                                     };
             }
         }
@@ -79,11 +79,12 @@ module TSOS {
             }
         }
 
-        // TODO: might want to throw run() and terminate() into another file come Project 3
+        //
+        // Dispatcher functions
+        //
 
-        public run(pcb) {
-            pcb.state = "running";
-
+        public run() {
+            // Ready queue already re-ordered, but the current process hasn't been updated yet
             /*** check if there's a PCB in CPU and if the state hasn't been set to "terminated" 
              * if so, then set state to "ready"
             ***/
@@ -91,8 +92,7 @@ module TSOS {
                 _CPU.Pcb.state = "ready";
             }
 
-            // TODO: change to CURR_PROCESS later
-            _CPU.Pcb = _ResidentList[0];
+            _CPU.updatePcb(_ReadyQueue[0]);
             _CPU.isExecuting = true;
         }
 
@@ -103,10 +103,20 @@ module TSOS {
              * if so, update the PCB in CPU, change the state, and stop execution 
             **/
             if (_CPU.Pcb && _CPU.Pcb != "terminated") {
-                _CPU.updatePcb(pcb);
-                _CPU.Pcb.state = "terminated";
-                _CPU.isExecuting = false;
+                _CPU.savePcbState();
+                _Scheduler.terminateCurrProcess(pcb);
+
+                if (_ReadyQueue.length == 1) {
+                    _CPU.isExecuting = false;
+                }
             }
+        }
+
+        public contextSwitch(){
+            var currentProcess = _ReadyQueue.shift();
+
+            _ReadyQueue.push(currentProcess);
+            _Scheduler.currProcess = _ReadyQueue[0];
         }
     }
 }

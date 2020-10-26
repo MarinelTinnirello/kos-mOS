@@ -42,6 +42,9 @@ module TSOS {
             _MemoryManager = new TSOS.MemoryManager();
             _MemoryManager.init();
 
+            // Initialize scheduler
+            _Scheduler = new TSOS.Scheduler();
+
             // Enable the OS Interrupts.  (Not the CPU clock interrupt, as that is done in the hardware sim.)
             this.krnTrace("Enabling the interrupts.");
             this.krnEnableInterrupts();
@@ -67,20 +70,27 @@ module TSOS {
             // Unload the Device Drivers?
             // More?
             //
+            _MemoryManager.terminate();
+            // for (var i = 0; i < _ResidentList.length; i++) {
+            //     _Scheduler.terminateCurrProcess(_ResidentList[i].pid);
+            // }
+
             this.krnTrace("end shutdown OS");
         }
 
 
         public krnOnCPUClockPulse() {
             /* This gets called from the host hardware simulation every time there is a hardware clock pulse.
-               This is NOT the same as a TIMER, which causes an interrupt and is handled like other interrupts.
-               This, on the other hand, is the clock pulse from the hardware / VM / host that tells the kernel
-               that it has to look for interrupts and process them if it finds any.                          
+                This is NOT the same as a TIMER, which causes an interrupt and is handled like other interrupts.
+                This, on the other hand, is the clock pulse from the hardware / VM / host that tells the kernel
+                that it has to look for interrupts and process them if it finds any.                          
             */
 
+            //_CPU.savePcbState();
             // update all host displays (except CPU) before all the interrupt or execution checks
             // CPU needs to be in execution check cause of Single Step mode
             TSOS.Control.hostMemoryDisplay();
+            //TSOS.Control.hostPcbDisplay();
 
             // Check for an interrupt, if there are any. Page 560
             if (_KernelInterruptQueue.getSize() > 0) {
@@ -93,23 +103,27 @@ module TSOS {
                     if (_NextStepMode) {
                         _Scheduler.updateCyclesTaken();
                         _CPU.cycle();
+                        _Scheduler.scheduleProcess();
                         _NextStepMode = false;
                     }
                 } else {
                     _Scheduler.updateCyclesTaken();
                     _CPU.cycle();
+                    _Scheduler.scheduleProcess();
                 }
 
+                //_Scheduler.cpuCycle();
                 TSOS.Control.hostCpuDisplay();
             } else {                       // If there are no interrupts and there is nothing being executed then just be idle.
                 this.krnTrace("Idle");
             }
 
-            if ((_ReadyQueue.length > 0 && _KernelInterruptQueue.getSize() == 0) &&
-                (!_SingleStepMode || _NextStepMode)) {
-                this.krnTrace("Set scheduler to active.");
-                _Scheduler.scheduleProcess();
-            }
+            // if ((_ReadyQueue.length > 0 && _KernelInterruptQueue.getSize() == 0) 
+            //     //&& (_SingleStepMode || _NextStepMode)
+            //     ) {
+            //     this.krnTrace("Set scheduler to active.");
+            //     _Scheduler.scheduleProcess();
+            // }
         }
 
 
@@ -146,12 +160,14 @@ module TSOS {
                     _StdIn.handleInput();
                     break;
                 case INVALID_ADDR_IRQ:                // Memory address isn't valid
+                    _MemoryManager.terminate();
                     _StdOut.advanceLine();
                     _StdOut.putText("Invalid memory address. PID=" + params + ", has been terminated.");
                     _StdOut.advanceLine();
                     _OsShell.putPrompt();
                     break;
                 case INVALID_OPCODE_IRQ:              // Opcode isn't valid
+                    _MemoryManager.terminate();
                     _StdOut.advanceLine();
                     _StdOut.putText("Invalid opcode. PID=" + params + ", has been terminated.");
                     _StdOut.advanceLine();
@@ -164,11 +180,14 @@ module TSOS {
                     _StdOut.advanceLine();
                     _OsShell.putPrompt();
                     break;
+                case KILL_PROCESS_IRQ:
+                    _MemoryManager.terminate();
+                    break;
                 // case SYSCALL_IRQ:                     // Prints out characters made from System Call function
                 //     _StdOut.putText(params);
                 //     break;
                 case CONTEXT_SWITCH_IRQ:               // Switches context to current process
-                    _MemoryManager.run(params[0]);
+                    _MemoryManager.run();
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
@@ -201,8 +220,8 @@ module TSOS {
         // OS Utility Routines
         //
         public krnTrace(msg: string) {
-             // Check globals to see if trace is set ON.  If so, then (maybe) log the message.
-             if (_Trace) {
+            // Check globals to see if trace is set ON.  If so, then (maybe) log the message.
+            if (_Trace) {
                 if (msg === "Idle") {
                     // We can't log every idle clock pulse because it would quickly lag the browser quickly.
                     if (_OSclock % 10 == 0) {
@@ -213,7 +232,7 @@ module TSOS {
                 } else {
                     Control.hostLog(msg, "OS");
                 }
-             }
+            }
         }
 
         public krnTrapError(msg) {
@@ -239,3 +258,4 @@ module TSOS {
         }
     }
 }
+    

@@ -36,6 +36,13 @@ var TSOS;
             }
             return retVal;
         }
+        peek() {
+            var retVal = null;
+            if (this.q.length > 0) {
+                retVal += this.q[0];
+            }
+            return retVal;
+        }
     }
     TSOS.Queue = Queue;
 })(TSOS || (TSOS = {}));

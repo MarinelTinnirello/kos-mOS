@@ -15,6 +15,8 @@
 var TSOS;
 (function (TSOS) {
     class MemoryAccessor {
+        constructor() {
+        }
         read(segment, v_addr) {
             var p_addr = v_addr + segment.base;
             /** if the physical address >= segment's limit or the virtual address is less than 0,

@@ -7,14 +7,16 @@
         - "ready"           // ready to be pushed into process list (will be important for Scheduler)
         - "running"         // process is currently running
         - "process"         // process has been pushed into process list
-        - "terminate"       // process has been terminated
+        - "terminated"      // process has been terminated
+    
+    PID increments per loaded input.
     ------------ */
 
 module TSOS {
 
     export class Pcb {
 
-        constructor(public pid: number = 0,             // process ID
+        constructor(public pid: number = _PidCount++,   // process ID
                     public priority: number = 0,        // priority of ID
                     public PC: number = 0,              // program counter
                     public IR: number = -1,             // intstruction register

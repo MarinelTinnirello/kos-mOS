@@ -19,15 +19,13 @@ const TIMER_IRQ = 0; // Pages 23 (timer), 9 (interrupts), and 561 (interrupt pri
 const KEYBOARD_IRQ = 1;
 const INVALID_ADDR_IRQ = 2; // invalid memory address interrupt
 const INVALID_OPCODE_IRQ = 3; // invalid op code interrupt
-const TERMINATE_PROCESS_IRQ = 4; // terminate process interrupt
-const SYSCALL_IRQ = 5; // system call intterupt
+const TERMINATE_PROCESS_IRQ = 4; // terminate process from CPU interrupt
+const SYSCALL_IRQ = 5; // system call interrupt
+const KILL_PROCESS_IRQ = 6; // terminate process interrupt
+const CONTEXT_SWITCH_IRQ = 7; // context switch interrupt
 // Memory
 const MEMORY_SIZE = 256; // size of a memory segment
 const NUM_OF_SEGMENTS = 3; // number of memory segments
-// Processes
-const PROCESS_LIST = []; // list of processes
-//const PROCESS_QUEUE = [];
-const CURR_PROCESS = null; // current process in the list
 //
 // Global Variables
 // TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.
@@ -37,7 +35,13 @@ var _PCB; // Utilize TypeScript's type annotation system to ensure that _PCB is 
 var _Memory; // Utilize TypeScript's type annotation system to ensure that _Memory is an instance of the Memory class.
 var _MemoryAccessor; // Utilize TypeScript's type annotation system to ensure that _MemoryAccessor is an instance of the MemoryAccessor class.
 var _MemoryManager; // Utilize TypeScript's type annotation system to ensure that _MemoryManager is an instance of the MemoryManager class.
+var _Scheduler; // Utilize TypeScript's type annotation system to ensure that _Scheduler is an instance of the Scheduler class.
 var _OSclock = 0; // Page 23.
+// Processes
+var _PidCount = 0; // counts PIDs over runtime
+var _ResidentList = []; // list of processes
+var _ReadyQueue = []; // list of processes ready to be ran
+//var _ReadyQueue: TSOS.Queue = new TSOS.Queue();      // queue of ready processes
 // Modes
 var _Mode = 0; // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
 var _SingleStepMode = false;

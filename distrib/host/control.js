@@ -101,7 +101,7 @@ var TSOS;
             var p_addr = 0;
             var memory = _Memory.memory;
             /*** split the table into 8x8 ***/
-            for (var i = 0; i < MEMORY_SIZE / 8; i++) {
+            for (var i = 0; i < (MEMORY_SIZE * NUM_OF_SEGMENTS) / 8; i++) {
                 row = tBody.insertRow(-1);
                 rowNum = i * 8;
                 // ... setting up padding for labels
@@ -191,39 +191,54 @@ var TSOS;
             cell.innerHTML = _CPU.Zflag.toString(16).toLocaleUpperCase();
         }
         // TODO: change to allow for multiple PCBs for Project 3
-        // public static hostPcbDisplay(): void {
-        //     var table = document.getElementById("tableCpu") as HTMLTableElement;
-        //     table.deleteRow(-1);
-        //     var row = table.insertRow(-1);
-        //     var cell;
-        //     // PID
-        //     cell = row.insertCell();
-        //     cell.innerHTML = PROCESS_LIST.pop().pid.toString(16).toLocaleUpperCase();
-        //     // PC
-        //     cell = row.insertCell();
-        //     cell.innerHTML = PROCESS_LIST.pop().PC.toString(16).toLocaleUpperCase();
-        //     // Acc
-        //     cell = row.insertCell();
-        //     cell.innerHTML = PROCESS_LIST.pop().Acc.toString(16).toLocaleUpperCase();
-        //     // IR
-        //     cell = row.insertCell();
-        //     cell.innerHTML = PROCESS_LIST.pop().IR.toString(16).toLocaleUpperCase();
-        //     // X Reg
-        //     cell = row.insertCell();
-        //     cell.innerHTML = PROCESS_LIST.pop().Xreg.toString(16).toLocaleUpperCase();
-        //     // Y Reg
-        //     cell = row.insertCell();
-        //     cell.innerHTML = PROCESS_LIST.pop().Yreg.toString(16).toLocaleUpperCase();
-        //     // Z Flag
-        //     cell = row.insertCell();
-        //     cell.innerHTML = PROCESS_LIST.pop().Zflag.toString(16).toLocaleUpperCase();
-        //     // Priority
-        //     cell = row.insertCell();
-        //     cell.innerHTML = PROCESS_LIST.pop().priority.toString(16).toLocaleUpperCase();
-        //     // State
-        //     cell = row.insertCell();
-        //     cell.innerHTML = PROCESS_LIST.pop().state;
-        // }
+        static hostPcbDisplay() {
+            // var table = document.getElementById("tablePcb") as HTMLTableElement;
+            // table.deleteRow(-1);
+            // var row = table.insertRow(-1);
+            // var cell;
+            // // PID
+            // cell = row.insertCell();
+            // cell.innerHTML = _ResidentList.pop().pid.toString(16).toLocaleUpperCase();
+            // // PC
+            // cell = row.insertCell();
+            // cell.innerHTML = _ResidentList.pop().PC.toString(16).toLocaleUpperCase();
+            // // Acc
+            // cell = row.insertCell();
+            // cell.innerHTML = _ResidentList.pop().Acc.toString(16).toLocaleUpperCase();
+            // // IR
+            // cell = row.insertCell();
+            // cell.innerHTML = _ResidentList.pop().IR.toString(16).toLocaleUpperCase();
+            // // X Reg
+            // cell = row.insertCell();
+            // cell.innerHTML = _ResidentList.pop().Xreg.toString(16).toLocaleUpperCase();
+            // // Y Reg
+            // cell = row.insertCell();
+            // cell.innerHTML = _ResidentList.pop().Yreg.toString(16).toLocaleUpperCase();
+            // // Z Flag
+            // cell = row.insertCell();
+            // cell.innerHTML = _ResidentList.pop().Zflag.toString(16).toLocaleUpperCase();
+            // // Priority
+            // cell = row.insertCell();
+            // cell.innerHTML = _ResidentList.pop().priority.toString(16).toLocaleUpperCase();
+            // // State
+            // cell = row.insertCell();
+            // cell.innerHTML = _ResidentList.pop().state;
+            var table = document.getElementById("tablePcb");
+            var tBody = document.createElement('tbody');
+            var row;
+            for (var i = 0; i < _ResidentList.length; i++) {
+                row = tBody.insertRow(-1);
+                row.insertCell(-1).innerHTML = _ResidentList[i].pid;
+                row.insertCell(-1).innerHTML = _ResidentList[i].PC;
+                row.insertCell(-1).innerHTML = _ResidentList[i].Acc.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _ResidentList[i].Xreg.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _ResidentList[i].Yreg.toString(16).toLocaleUpperCase();
+                row.insertCell(-1).innerHTML = _ResidentList[i].Zflag.toString(16);
+                row.insertCell(-1).innerHTML = _ResidentList[i].priority;
+                row.insertCell(-1).innerHTML = _ResidentList[i].state.toLocaleUpperCase();
+            }
+            table.replaceChild(tBody, table.tBodies[0]);
+        }
         //
         // Host Button Events
         //
@@ -245,6 +260,7 @@ var TSOS;
             _Memory = new TSOS.Memory();
             _Memory.init();
             _MemoryAccessor = new TSOS.MemoryAccessor();
+            //_MemoryManager = new TSOS.MemoryManager();
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(TSOS.Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
             // .. and call the OS Kernel Bootstrap routine.

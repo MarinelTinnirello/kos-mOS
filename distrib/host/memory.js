@@ -16,7 +16,7 @@ var TSOS;
             /*** loop through memory segment size and initialize all indices to 0
              * or rather, "00" cause everything is considered in hex pairs
             ***/
-            for (var i = 0; i < MEMORY_SIZE; i++) {
+            for (var i = 0; i < MEMORY_SIZE * NUM_OF_SEGMENTS; i++) {
                 this.memory[i] = "00";
             }
         }

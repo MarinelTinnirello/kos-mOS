@@ -12,13 +12,14 @@
 var TSOS;
 (function (TSOS) {
     class MemoryManager {
-        constructor(registers = [], isAvailable = []) {
+        constructor(registers = [], // registers for the given segment
+        isAvailable = []) {
             this.registers = registers;
             this.isAvailable = isAvailable;
         }
         init() {
             /*** loops through number of memory segments to assign availibility and register attributes ***/
-            for (var i = 0; i < NUM_OF_SEGMENTS; i++) {
+            for (var i = 0; i < MEMORY_SIZE / NUM_OF_SEGMENTS; i++) {
                 this.isAvailable[i] = true;
                 this.registers[i] = { index: i,
                     base: MEMORY_SIZE * i,
@@ -52,24 +53,32 @@ var TSOS;
             // Set availability for current segment and PCB
             this.isAvailable[segment] = false;
             pcb.segment = this.registers[segment];
-            // Set priority for current process (won't affect us right now, but it's futureproofing for Project 3)
+            // Set priority for current process
             pcb.priority = parseInt(priority) || 0;
             pcb.state = "process";
             // push current PCB into process list
-            PROCESS_LIST.push(pcb);
+            _ResidentList.push(pcb);
             return pcb;
         }
-        // TODO: might want to throw run() and terminate() into another file come Project 3
-        run(pcb) {
-            pcb.state = "running";
+        clearAllMem(ignoreProcesses) {
+            for (var segment of this.registers) {
+                if (!ignoreProcesses.includes(segment.index)) {
+                    _MemoryAccessor.reset(segment);
+                }
+            }
+        }
+        //
+        // Dispatcher functions
+        //
+        run() {
+            // Ready queue already re-ordered, but the current process hasn't been updated yet
             /*** check if there's a PCB in CPU and if the state hasn't been set to "terminated"
              * if so, then set state to "ready"
             ***/
             if (_CPU.Pcb && _CPU.Pcb.state !== "terminated") {
                 _CPU.Pcb.state = "ready";
             }
-            // TODO: change to CURR_PROCESS later
-            _CPU.Pcb = PROCESS_LIST[0];
+            _CPU.updatePcb(_ReadyQueue[0]);
             _CPU.isExecuting = true;
         }
         terminate() {
@@ -78,10 +87,17 @@ var TSOS;
              * if so, update the PCB in CPU, change the state, and stop execution
             **/
             if (_CPU.Pcb && _CPU.Pcb != "terminated") {
-                _CPU.updatePcb(pcb);
-                _CPU.Pcb.state = "terminated";
-                _CPU.isExecuting = false;
+                _CPU.savePcbState();
+                _Scheduler.terminateCurrProcess(pcb);
+                if (_ReadyQueue.length == 1) {
+                    _CPU.isExecuting = false;
+                }
             }
+        }
+        contextSwitch() {
+            var currentProcess = _ReadyQueue.shift();
+            _ReadyQueue.push(currentProcess);
+            _Scheduler.currProcess = _ReadyQueue[0];
         }
     }
     TSOS.MemoryManager = MemoryManager;
