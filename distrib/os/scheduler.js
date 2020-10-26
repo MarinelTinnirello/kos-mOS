@@ -56,6 +56,7 @@ var TSOS;
                 _Kernel.krnTrace("Context switch in progress...");
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONTEXT_SWITCH_IRQ, []));
             }
+            this.isLastProcess(_CPU.Pcb);
         }
         terminateCurrProcess(currProcess) {
             currProcess.state = "terminated";
@@ -84,6 +85,12 @@ var TSOS;
                 _StdOut.advanceLine();
             }
             _ReadyQueue.push(pcb);
+        }
+        isLastProcess(pcb) {
+            if (_ReadyQueue[_ReadyQueue.length - 1] && pcb.state === "terminated") {
+                this.turns = 0;
+                _CPU.init();
+            }
         }
         updateCyclesTaken() {
             _Kernel.krnTrace("Updating turnaround and wait time...");

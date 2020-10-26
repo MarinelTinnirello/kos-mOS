@@ -74,7 +74,8 @@ var TSOS;
             return time;
         }
         static hostMemoryDisplay() {
-            var opCodeMap = { "A9": { "pcNum": 1 },
+            var opCodeMap = {
+                "A9": { "pcNum": 1 },
                 "AD": { "pcNum": 2 },
                 "8D": { "pcNum": 2 },
                 "6D": { "pcNum": 2 },
@@ -190,54 +191,34 @@ var TSOS;
             cell = row.insertCell();
             cell.innerHTML = _CPU.Zflag.toString(16).toLocaleUpperCase();
         }
-        // TODO: change to allow for multiple PCBs for Project 3
         static hostPcbDisplay() {
-            // var table = document.getElementById("tablePcb") as HTMLTableElement;
-            // table.deleteRow(-1);
-            // var row = table.insertRow(-1);
-            // var cell;
-            // // PID
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().pid.toString(16).toLocaleUpperCase();
-            // // PC
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().PC.toString(16).toLocaleUpperCase();
-            // // Acc
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().Acc.toString(16).toLocaleUpperCase();
-            // // IR
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().IR.toString(16).toLocaleUpperCase();
-            // // X Reg
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().Xreg.toString(16).toLocaleUpperCase();
-            // // Y Reg
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().Yreg.toString(16).toLocaleUpperCase();
-            // // Z Flag
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().Zflag.toString(16).toLocaleUpperCase();
-            // // Priority
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().priority.toString(16).toLocaleUpperCase();
-            // // State
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().state;
             var table = document.getElementById("tablePcb");
-            var tBody = document.createElement('tbody');
-            var row;
-            for (var i = 0; i < _ResidentList.length; i++) {
-                row = tBody.insertRow(-1);
-                row.insertCell(-1).innerHTML = _ResidentList[i].pid;
-                row.insertCell(-1).innerHTML = _ResidentList[i].PC;
-                row.insertCell(-1).innerHTML = _ResidentList[i].Acc.toString(16).toLocaleUpperCase();
-                row.insertCell(-1).innerHTML = _ResidentList[i].Xreg.toString(16).toLocaleUpperCase();
-                row.insertCell(-1).innerHTML = _ResidentList[i].Yreg.toString(16).toLocaleUpperCase();
-                row.insertCell(-1).innerHTML = _ResidentList[i].Zflag.toString(16);
-                row.insertCell(-1).innerHTML = _ResidentList[i].priority;
-                row.insertCell(-1).innerHTML = _ResidentList[i].state.toLocaleUpperCase();
+            try {
+                for (var i = 0; i < _ReadyQueue.length; i++) {
+                    document.getElementById(`tempRow`).parentNode.removeChild(document.getElementById(`tempRow`));
+                }
             }
-            table.replaceChild(tBody, table.tBodies[0]);
+            catch (e) { }
+            // Loop through the ready
+            for (var i = 0; i < _ReadyQueue.length; i++) {
+                // For each pcb in the ready queue create a row
+                var tRow = document.createElement("tr");
+                tRow.setAttribute('id', 'tempRow');
+                // Create the cells for rows
+                for (var g = 0; g < 8; g++) {
+                    var tCell = document.createElement("td");
+                    tRow.appendChild(tCell);
+                }
+                tRow.cells[0].innerHTML = _ResidentList[i].pid;
+                tRow.cells[1].innerHTML = _ResidentList[i].PC;
+                tRow.cells[2].innerHTML = _ResidentList[i].Acc.toString(16).toLocaleUpperCase();
+                tRow.cells[3].innerHTML = _ResidentList[i].Xreg.toString(16).toLocaleUpperCase();
+                tRow.cells[4].innerHTML = _ResidentList[i].Yreg.toString(16).toLocaleUpperCase();
+                tRow.cells[5].innerHTML = _ResidentList[i].Zflag.toString(16);
+                tRow.cells[6].innerHTML = _ResidentList[i].priority;
+                tRow.cells[7].innerHTML = _ResidentList[i].state.toLocaleUpperCase();
+                table.appendChild(tRow);
+            }
         }
         //
         // Host Button Events

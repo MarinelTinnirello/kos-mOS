@@ -61,6 +61,8 @@ module TSOS {
                 _Kernel.krnTrace("Context switch in progress...");
                 _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH_IRQ, []))
             }
+
+            this.isLastProcess(_CPU.Pcb);
         }
 
         public terminateCurrProcess(currProcess): void {
@@ -95,6 +97,13 @@ module TSOS {
             }
 
             _ReadyQueue.push(pcb);
+        }
+
+        public isLastProcess(pcb: Pcb): void {
+            if (_ReadyQueue[_ReadyQueue.length - 1] && pcb.state === "terminated") {
+                this.turns = 0;
+                _CPU.init();
+            }
         }
 
         public updateCyclesTaken(): void {

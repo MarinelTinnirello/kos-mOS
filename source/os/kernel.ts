@@ -90,7 +90,7 @@ module TSOS {
             // update all host displays (except CPU) before all the interrupt or execution checks
             // CPU needs to be in execution check cause of Single Step mode
             TSOS.Control.hostMemoryDisplay();
-            //TSOS.Control.hostPcbDisplay();
+            TSOS.Control.hostPcbDisplay();
 
             // Check for an interrupt, if there are any. Page 560
             if (_KernelInterruptQueue.getSize() > 0) {

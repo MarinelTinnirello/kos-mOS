@@ -79,6 +79,7 @@ var TSOS;
                 _CPU.Pcb.state = "ready";
             }
             _CPU.updatePcb(_ReadyQueue[0]);
+            _CPU.Pcb.state = "running";
             _CPU.isExecuting = true;
         }
         terminate() {

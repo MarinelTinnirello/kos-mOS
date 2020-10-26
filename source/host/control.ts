@@ -39,11 +39,11 @@ module TSOS {
 
             // Clear the log text box.
             // Use the TypeScript cast to HTMLInputElement
-            (<HTMLInputElement> document.getElementById("taHostLog")).value="";
+            (<HTMLInputElement>document.getElementById("taHostLog")).value = "";
 
             // Set focus on the start button.
             // Use the TypeScript cast to HTMLInputElement
-            (<HTMLInputElement> document.getElementById("btnStartOS")).focus();
+            (<HTMLInputElement>document.getElementById("btnStartOS")).focus();
 
             // Check for our testing and enrichment core, which
             // may be referenced here (from index.html) as function Glados().
@@ -63,15 +63,15 @@ module TSOS {
             var now: number = new Date().getTime();
 
             // Build the log string.
-            var str: string = "({ clock:" + clock + ", source:" + source + ", msg:" + msg + ", now:" + now  + " })"  + "\n";
+            var str: string = "({ clock:" + clock + ", source:" + source + ", msg:" + msg + ", now:" + now + " })" + "\n";
 
             // Update the log console.
-            var taLog = <HTMLInputElement> document.getElementById("taHostLog");
+            var taLog = <HTMLInputElement>document.getElementById("taHostLog");
             taLog.value = str + taLog.value;
 
             // TODO in the future: Optionally update a log database or some streaming service.
         }
-        
+
         //
         // Host Functions
         //
@@ -93,21 +93,22 @@ module TSOS {
         }
 
         public static hostMemoryDisplay(): void {
-            var opCodeMap = {"A9": {"pcNum": 1},
-                            "AD": {"pcNum": 2},
-                            "8D": {"pcNum": 2},
-                            "6D": {"pcNum": 2},
-                            "A2": {"pcNum": 1},
-                            "AE": {"pcNum": 2},
-                            "A0": {"pcNum": 1},
-                            "AC": {"pcNum": 2},
-                            "EA": {"pcNum": 0},
-                            "00": {"pcNum": 0},
-                            "EC": {"pcNum": 2},
-                            "D0": {"pcNum": 1},
-                            "EE": {"pcNum": 2},
-                            "FF": {"pcNum": 0}
-                            };
+            var opCodeMap = {
+                "A9": { "pcNum": 1 },
+                "AD": { "pcNum": 2 },
+                "8D": { "pcNum": 2 },
+                "6D": { "pcNum": 2 },
+                "A2": { "pcNum": 1 },
+                "AE": { "pcNum": 2 },
+                "A0": { "pcNum": 1 },
+                "AC": { "pcNum": 2 },
+                "EA": { "pcNum": 0 },
+                "00": { "pcNum": 0 },
+                "EC": { "pcNum": 2 },
+                "D0": { "pcNum": 1 },
+                "EE": { "pcNum": 2 },
+                "FF": { "pcNum": 0 }
+            };
 
             var table = document.getElementById("tableMemory") as HTMLTableElement;
             var tBody = document.createElement('tbody');
@@ -118,7 +119,7 @@ module TSOS {
             var rowNum = 0;
             var placeNum = 0;
             var highlightCell;
-            
+
             // Memory data needed to be placed in table
             var p_addr = 0;
             var memory = _Memory.memory;
@@ -169,9 +170,9 @@ module TSOS {
                             /** if current op code is D0, don't highlight
                              * this is cause D0 is our branch operation 
                             **/
-                           if (currOp == "D0") {
-                               opHighlights[0] = 0;
-                           }
+                            if (currOp == "D0") {
+                                opHighlights[0] = 0;
+                            }
                         }
 
                         /** if the 1st index is greater than 0 and there's something in the 2nd, highlight pink **/
@@ -229,61 +230,49 @@ module TSOS {
             cell.innerHTML = _CPU.Zflag.toString(16).toLocaleUpperCase();
         }
 
-        // TODO: change to allow for multiple PCBs for Project 3
         public static hostPcbDisplay(): void {
-            // var table = document.getElementById("tablePcb") as HTMLTableElement;
+            var table = document.getElementById("tablePcb");
 
-            // table.deleteRow(-1);
+            /* For whatever reason, the PCB table is total ass to work with in comparison to the other 2 tables
+             * Ok, not "for whatever reason", it's cause there's multiple rows we're generating at runtime
+             * based on the amount of processes
+             * But we do a try-catch 1st to add and remove tables as we're reading in info
+            */
 
-            // var row = table.insertRow(-1);
-            // var cell;
-
-            // // PID
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().pid.toString(16).toLocaleUpperCase();
-            // // PC
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().PC.toString(16).toLocaleUpperCase();
-            // // Acc
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().Acc.toString(16).toLocaleUpperCase();
-            // // IR
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().IR.toString(16).toLocaleUpperCase();
-            // // X Reg
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().Xreg.toString(16).toLocaleUpperCase();
-            // // Y Reg
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().Yreg.toString(16).toLocaleUpperCase();
-            // // Z Flag
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().Zflag.toString(16).toLocaleUpperCase();
-            // // Priority
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().priority.toString(16).toLocaleUpperCase();
-            // // State
-            // cell = row.insertCell();
-            // cell.innerHTML = _ResidentList.pop().state;
-
-            var table = document.getElementById("tablePcb") as HTMLTableElement;
-            var tBody = document.createElement('tbody');
-            var row;
-
-            for (var i = 0; i < _ResidentList.length; i++) {
-                row = tBody.insertRow(-1);
-
-                row.insertCell(-1).innerHTML = _ResidentList[i].pid;
-                row.insertCell(-1).innerHTML = _ResidentList[i].PC;
-                row.insertCell(-1).innerHTML = _ResidentList[i].Acc.toString(16).toLocaleUpperCase();
-                row.insertCell(-1).innerHTML = _ResidentList[i].Xreg.toString(16).toLocaleUpperCase();
-                row.insertCell(-1).innerHTML = _ResidentList[i].Yreg.toString(16).toLocaleUpperCase();
-                row.insertCell(-1).innerHTML = _ResidentList[i].Zflag.toString(16);
-                row.insertCell(-1).innerHTML = _ResidentList[i].priority;
-                row.insertCell(-1).innerHTML = _ResidentList[i].state.toLocaleUpperCase();
+            /*** try looping through the ready queue's length,
+             * add and then remove the temp row
+             * if not, catch the exception 
+            ***/
+            try {
+                for (var i = 0; i < _ReadyQueue.length; i++) {
+                    document.getElementById(`tempRow`).parentNode.removeChild(document.getElementById(`tempRow`));
+                }
             }
+            catch (e) { }
 
-            table.replaceChild(tBody, table.tBodies[0]);
+            /*** for the ready queue's length,
+             * create rows and their respective shells for each PCB
+            ***/
+            for (var i = 0; i < _ReadyQueue.length; i++) {
+                var tRow = document.createElement("tr");
+                tRow.setAttribute('id', 'tempRow');
+                
+                for (var j = 0; j < 8; j++) {
+                    var tCell = document.createElement("td");
+                    tRow.appendChild(tCell);
+                }
+
+                tRow.cells[0].innerHTML = _ResidentList[i].pid;
+                tRow.cells[1].innerHTML = _ResidentList[i].PC;
+                tRow.cells[2].innerHTML = _ResidentList[i].Acc.toString(16).toLocaleUpperCase();
+                tRow.cells[3].innerHTML = _ResidentList[i].Xreg.toString(16).toLocaleUpperCase();
+                tRow.cells[4].innerHTML = _ResidentList[i].Yreg.toString(16).toLocaleUpperCase();
+                tRow.cells[5].innerHTML = _ResidentList[i].Zflag.toString(16);
+                tRow.cells[6].innerHTML = _ResidentList[i].priority;
+                tRow.cells[7].innerHTML = _ResidentList[i].state.toLocaleUpperCase();
+
+                table.appendChild(tRow);
+            }
         }
 
         //
