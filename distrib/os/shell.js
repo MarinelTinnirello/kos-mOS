@@ -436,9 +436,11 @@ var TSOS;
                 if (isValid) {
                     var hexPair = programArr.match(/.{2}/g);
                     var Pcb = _MemoryManager.load(hexPair, args[0]);
-                    // in order to use formatting for pid, you need to use " ` ` "
-                    // "" treats text like a literal, `` allows for templating
-                    _StdOut.putText(`Program loaded - PID: ${Pcb.pid}`);
+                    if (Pcb) {
+                        // in order to use formatting for pid, you need to use " ` ` "
+                        // "" treats text like a literal, `` allows for templating
+                        _StdOut.putText(`Program loaded - PID: ${Pcb.pid}`);
+                    }
                 }
                 else {
                     _StdOut.putText("Usage: Invalid hex characters.");
@@ -473,10 +475,10 @@ var TSOS;
             }
         }
         shellRunAll(args) {
-            var residentList = _ResidentList.filter(element => element.state == "process");
-            var pidMap = residentList.map(element => element.pid);
+            var residentList = _ResidentList.filter(val => val.state == "process");
+            var pidMap = residentList.map(val => val.pid);
             for (var pid of pidMap) {
-                var pcb = _ResidentList.find(element => element.pid == pid);
+                var pcb = _ResidentList.find(val => val.pid == pid);
                 _StdOut.putText(`Running process.  PID: ${pcb.pid}`);
                 _StdOut.advanceLine();
                 _Scheduler.loadToReadyQueue(pcb);
@@ -499,9 +501,8 @@ var TSOS;
              * else if process's state is running, push to ignore process
             ***/
             for (var pcb of _ResidentList) {
-                if ((pcb.state != "terminated") && (pcb.state != "running")) {
+                if ((pcb.state !== "terminated") && (pcb.state !== "running")) {
                     _KernelInputQueue.enqueue(new TSOS.Interrupt(KILL_PROCESS_IRQ, [pcb]));
-                    //_Scheduler.terminateCurrProcess(pcb.pid);
                 }
                 else if (pcb.state == "running") {
                     ignoreProcesses.push(pcb.segment.index);
@@ -513,9 +514,8 @@ var TSOS;
             /** check if there's a pid arguement to pass **/
             if (args.length > 0) {
                 var pid = parseInt(args[0]);
-                var pcb = _ReadyQueue.find(element => element.pid == args[0]);
+                var pcb = _ReadyQueue.find(val => val.pid == args[0]);
                 if (pcb) {
-                    _StdOut.putText(`Process ${pid} has been terminated.`);
                     _KernelInputQueue.enqueue(new TSOS.Interrupt(KILL_PROCESS_IRQ, [pcb]));
                 }
                 else {
@@ -527,8 +527,10 @@ var TSOS;
             }
         }
         shellKillAll(args) {
-            for (var pcb of _ReadyQueue) {
-                _KernelInputQueue.enqueue(new TSOS.Interrupt(KILL_PROCESS_IRQ, [pcb]));
+            if (_ReadyQueue.length > 0) {
+                for (var i = 0; i < _ReadyQueue.length; i++) {
+                    this.shellKill(`${_ReadyQueue[i].pid}`);
+                }
             }
         }
         shellQuantum(args) {

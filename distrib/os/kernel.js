@@ -97,18 +97,11 @@ var TSOS;
                     _CPU.cycle();
                     _Scheduler.scheduleProcess();
                 }
-                //_Scheduler.cpuCycle();
                 TSOS.Control.hostCpuDisplay();
             }
             else { // If there are no interrupts and there is nothing being executed then just be idle.
                 this.krnTrace("Idle");
             }
-            // if ((_ReadyQueue.length > 0 && _KernelInterruptQueue.getSize() == 0) 
-            //     //&& (_SingleStepMode || _NextStepMode)
-            //     ) {
-            //     this.krnTrace("Set scheduler to active.");
-            //     _Scheduler.scheduleProcess();
-            // }
         }
         //
         // Interrupt Handling

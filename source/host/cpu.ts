@@ -89,7 +89,13 @@ module TSOS {
                     this.sysCall();
                     break;
                 default:
-                    _KernelInterruptQueue.enqueue(new Interrupt(INVALID_OPCODE_IRQ, this.Pcb.pid))
+                    _StdOut.advanceLine();
+                    _StdOut.putText("Invalid op code. Process cannot be loaded.");
+                    _StdOut.advanceLine();
+                    _OsShell.putPrompt();
+                    
+                    _Kernel.krnTrapError("Invalid op code. Process cannot be loaded.");
+                    //_KernelInterruptQueue.enqueue(new Interrupt(INVALID_OPCODE_IRQ, this.Pcb.pid))
                     this.isExecuting = false;
             }
         }

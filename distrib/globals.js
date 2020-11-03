@@ -23,6 +23,7 @@ const TERMINATE_PROCESS_IRQ = 4; // terminate process from CPU interrupt
 const SYSCALL_IRQ = 5; // system call interrupt
 const KILL_PROCESS_IRQ = 6; // terminate process interrupt
 const CONTEXT_SWITCH_IRQ = 7; // context switch interrupt
+const KILL_ALL_PROCESS_IRQ = 8; // terminate all processes interrupt
 // Memory
 const MEMORY_SIZE = 256; // size of a memory segment
 const NUM_OF_SEGMENTS = 3; // number of memory segments

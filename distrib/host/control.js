@@ -193,24 +193,33 @@ var TSOS;
         }
         static hostPcbDisplay() {
             var table = document.getElementById("tablePcb");
+            /* For whatever reason, the PCB table is total ass to work with in comparison to the other 2 tables
+             * Ok, not "for whatever reason", it's cause there's multiple rows we're generating at runtime
+             * based on the amount of processes
+             * But we do a try-catch 1st to add and remove tables as we're reading in info
+            */
+            /*** try looping through the ready queue's length,
+             * add and then remove the temp row
+             * if not, catch the exception
+            ***/
             try {
                 for (var i = 0; i < _ReadyQueue.length; i++) {
                     document.getElementById(`tempRow`).parentNode.removeChild(document.getElementById(`tempRow`));
                 }
             }
             catch (e) { }
-            // Loop through the ready
+            /*** for the ready queue's length,
+             * create rows and their respective shells for each PCB
+            ***/
             for (var i = 0; i < _ReadyQueue.length; i++) {
-                // For each pcb in the ready queue create a row
                 var tRow = document.createElement("tr");
                 tRow.setAttribute('id', 'tempRow');
-                // Create the cells for rows
-                for (var g = 0; g < 8; g++) {
+                for (var j = 0; j < 8; j++) {
                     var tCell = document.createElement("td");
                     tRow.appendChild(tCell);
                 }
                 tRow.cells[0].innerHTML = _ResidentList[i].pid;
-                tRow.cells[1].innerHTML = _ResidentList[i].PC;
+                tRow.cells[1].innerHTML = _ResidentList[i].PC.toString(16).toLocaleUpperCase();
                 tRow.cells[2].innerHTML = _ResidentList[i].Acc.toString(16).toLocaleUpperCase();
                 tRow.cells[3].innerHTML = _ResidentList[i].Xreg.toString(16).toLocaleUpperCase();
                 tRow.cells[4].innerHTML = _ResidentList[i].Yreg.toString(16).toLocaleUpperCase();

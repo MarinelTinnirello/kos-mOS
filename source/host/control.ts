@@ -263,7 +263,7 @@ module TSOS {
                 }
 
                 tRow.cells[0].innerHTML = _ResidentList[i].pid;
-                tRow.cells[1].innerHTML = _ResidentList[i].PC;
+                tRow.cells[1].innerHTML = _ResidentList[i].PC.toString(16).toLocaleUpperCase();
                 tRow.cells[2].innerHTML = _ResidentList[i].Acc.toString(16).toLocaleUpperCase();
                 tRow.cells[3].innerHTML = _ResidentList[i].Xreg.toString(16).toLocaleUpperCase();
                 tRow.cells[4].innerHTML = _ResidentList[i].Yreg.toString(16).toLocaleUpperCase();

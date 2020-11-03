@@ -26,7 +26,7 @@ module TSOS {
         // Process handling
         //
         public scheduleProcess(): void {
-            this.currProcess = _ReadyQueue.find(element => element.state == "running");
+            this.currProcess = _ReadyQueue.find(val => val.state == "running");
 
             switch(this.currSchedulerType) {
                 case "rr":      // Round robin
@@ -61,13 +61,11 @@ module TSOS {
                 _Kernel.krnTrace("Context switch in progress...");
                 _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH_IRQ, []))
             }
-
-            this.isLastProcess(_CPU.Pcb);
         }
 
         public terminateCurrProcess(currProcess): void {
             currProcess.state = "terminated";
-            _ReadyQueue = _ReadyQueue.filter(element => element.pid != currProcess.pid);
+            _ReadyQueue = _ReadyQueue.filter(val => val.pid != currProcess.pid);
             _MemoryManager.isAvailable[currProcess.segment.index] = true;
 
             _StdOut.advanceLine();
@@ -97,13 +95,6 @@ module TSOS {
             }
 
             _ReadyQueue.push(pcb);
-        }
-
-        public isLastProcess(pcb: Pcb): void {
-            if (_ReadyQueue[_ReadyQueue.length - 1] && pcb.state === "terminated") {
-                this.turns = 0;
-                _CPU.init();
-            }
         }
 
         public updateCyclesTaken(): void {

@@ -27,7 +27,7 @@ var TSOS;
         // Process handling
         //
         scheduleProcess() {
-            this.currProcess = _ReadyQueue.find(element => element.state == "running");
+            this.currProcess = _ReadyQueue.find(val => val.state == "running");
             switch (this.currSchedulerType) {
                 case "rr": // Round robin
                     _Kernel.krnTrace(`Round robin scheduling; quantum = ${this.quantum}`);
@@ -56,11 +56,10 @@ var TSOS;
                 _Kernel.krnTrace("Context switch in progress...");
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONTEXT_SWITCH_IRQ, []));
             }
-            this.isLastProcess(_CPU.Pcb);
         }
         terminateCurrProcess(currProcess) {
             currProcess.state = "terminated";
-            _ReadyQueue = _ReadyQueue.filter(element => element.pid != currProcess.pid);
+            _ReadyQueue = _ReadyQueue.filter(val => val.pid != currProcess.pid);
             _MemoryManager.isAvailable[currProcess.segment.index] = true;
             _StdOut.advanceLine();
             _StdOut.putText(`Process: ${currProcess.pid} terminated.`);
@@ -85,12 +84,6 @@ var TSOS;
                 _StdOut.advanceLine();
             }
             _ReadyQueue.push(pcb);
-        }
-        isLastProcess(pcb) {
-            if (_ReadyQueue[_ReadyQueue.length - 1] && pcb.state === "terminated") {
-                this.turns = 0;
-                _CPU.init();
-            }
         }
         updateCyclesTaken() {
             _Kernel.krnTrace("Updating turnaround and wait time...");
