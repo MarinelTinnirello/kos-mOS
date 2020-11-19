@@ -42,6 +42,7 @@ var _Memory: TSOS.Memory;  // Utilize TypeScript's type annotation system to ens
 var _MemoryAccessor: TSOS.MemoryAccessor;    // Utilize TypeScript's type annotation system to ensure that _MemoryAccessor is an instance of the MemoryAccessor class.
 var _MemoryManager: TSOS.MemoryManager;      // Utilize TypeScript's type annotation system to ensure that _MemoryManager is an instance of the MemoryManager class.
 var _Scheduler: TSOS.Scheduler;              // Utilize TypeScript's type annotation system to ensure that _Scheduler is an instance of the Scheduler class.
+var _Disk: TSOS.Disk;      // Utilize TypeScript's type annotation system to ensure that _Disk is an instance of the Disk class.
 
 var _OSclock: number = 0;  // Page 23.
 
@@ -83,6 +84,7 @@ var _SarcasticMode: boolean = false;
 
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver: TSOS.DeviceDriverKeyboard  = null;
+var _krnDiskDriver: TSOS.DeviceDriverDisk = null;
 
 var _hardwareClockID: any = null;
 
