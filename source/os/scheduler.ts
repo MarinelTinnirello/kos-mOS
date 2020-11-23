@@ -68,6 +68,10 @@ module TSOS {
             _ReadyQueue = _ReadyQueue.filter(val => val.pid != currProcess.pid);
             _MemoryManager.isAvailable[currProcess.segment.index] = true;
 
+            if (currProcess.location == 'hdd') {
+                _krnDiskDriver.deleteFile(currProcess.swapFile, true);
+            }
+
             _StdOut.advanceLine();
             _StdOut.putText(`Process: ${currProcess.pid} terminated.`);
             _StdOut.advanceLine();

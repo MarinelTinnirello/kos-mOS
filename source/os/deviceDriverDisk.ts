@@ -1,25 +1,41 @@
+/* ----------------------------------
+   DeviceDriverDisk.ts
+
+   The Kernel Disk Device Driver.
+   The representation of the hard drive.  Made to mimic the Device Driver in terms of setup.
+
+   Note:  With the addition of a file system in Project 4, pretty much anything that touches our programs running
+          need for us to go back and add file system functionality, either by checking if something is formatted,
+          where something's being stored, or if it's been swapped.  So all things memory will be completely edited.
+          Just didn't feel like commenting this all over in my memory files, so I decided to throw this comment here.
+
+   ---------------------------------- */
+
 module TSOS {
     export class DeviceDriverDisk extends DeviceDriver {
 
         constructor(
-            public formatted = false,
+            public isFormatted = false,
             public forbiddenPrefixes = ['@'],
             public specialPrefixes = ['@', '.'],
-            public masterBootRecord = '0:0:0',
-            public directoryDataInfo = {'type': 'directory', 'start': '0:0:1', 'end': '0:7:7'},
-            public fileDataInfo = {'type': 'file', 'start': '1:0:0', 'end': '3:7:7'}
+            public mbr = '0:0:0',
+            public dirData = {'type': 'directory', 'start': '0:0:1', 'end': '0:7:7'},
+            public fileData = {'type': 'file', 'start': '1:0:0', 'end': '3:7:7'}
         ) {
 
             super();
             this.driverEntry = this.krnFsDriverEntry;
-            this.isr = this.krnFsDispatchOperation;
+            this.isr = this.krnFsConsoleCmd;
         }
 
+        //
+        // Kernel functions
+        //
         public krnFsDriverEntry() {
             this.status = "loaded";
         }
 
-        public krnFsDispatchOperation(params) {
+        public krnFsConsoleCmd(params) {
             var action = params[0];     // Operation to be completed
             var target = params[1];     // Target of operation -- file or directory name
             var data = params[2];       // Any data associated with operation
@@ -31,7 +47,7 @@ module TSOS {
                 _StdOut.putText(result.msg);
 
             } else {
-                if (this.formatted) {
+                if (this.isFormatted) {
                     switch (action) {
 
                         case 'create': {
@@ -81,7 +97,10 @@ module TSOS {
             }
         }
 
-        public create(fileName, isSwap) {
+        //
+        // Console command functionalities
+        //
+        public create(fileName, isSwapped) {
             // Checks for files before creation
             /** if file's length is greater than data size,
              * then file is too big
@@ -93,11 +112,11 @@ module TSOS {
             /** if file is found within directory,
              * then file already exists
             **/
-            if (this.searchFiles(new RegExp(`^${fileName}$`), this.directoryDataInfo)[0]) {
+            if (this.searchFiles(new RegExp(`^${fileName}$`), this.dirData)[0]) {
                 return {status: 1, msg: `File with name '${fileName}' already exists`};
             }
 
-            var key = this.findFreeSpace(1, this.directoryDataInfo)[0];
+            var key = this.findFreeSpace(1, this.dirData)[0];
 
             /** if there's no key,
              * then there's no space to create file
@@ -165,8 +184,8 @@ module TSOS {
             sessionStorage.setItem( key, data.join('') );
         }
 
-        public readFile(target, isSwap) {
-            var result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
+        public readFile(target, isSwapped) {
+            var result = this.searchFiles(new RegExp(`^${target}$`), this.dirData);
 
             if (result.length == 0) { 
                 return {status: 1, msg: `File '${target}' does not exist`};
@@ -174,7 +193,7 @@ module TSOS {
 
             var dirKey = result[0];
             var dirBlock = this.read(dirKey);
-            var output = isSwap ? [] : '';
+            var output = isSwapped ? [] : '';
             var currBlock;
             var currPointer = this.keyObjectToString(dirBlock.pointerBits);
 
@@ -186,7 +205,7 @@ module TSOS {
                  * turn output into hex
                  * else, concatinate
                 **/
-                if(!isSwap) {
+                if(!isSwapped) {
                     output += this.translateFromHex(currBlock.data);
                 } else {
                     output = output.concat(currBlock.data);
@@ -198,7 +217,7 @@ module TSOS {
             /** if is swapped and output is of type object,
              * loop through output and get rid of extra 00s
             **/
-            if (isSwap && typeof output == 'object') {
+            if (isSwapped && typeof output == 'object') {
                 while (output[output.length - 1] == '00' && (output[output.length - 2] && output[output.length - 2] == '00')) {
                     output.pop();
                 }
@@ -207,11 +226,11 @@ module TSOS {
             return {status: 0, msg: output};
         }
 
-        public writeFile(target, data, isSwap) {
+        public writeFile(target, data, isSwapped) {
             /** if not a swap file,
              * then don't split data 
             **/
-            if (!isSwap) {
+            if (!isSwapped) {
                 data = data.split("");
             }
 
@@ -222,7 +241,7 @@ module TSOS {
                 dataPieces.push(data.splice(0, _Disk.dataSize));
             }
 
-            var dirBlockResult = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
+            var dirBlockResult = this.searchFiles(new RegExp(`^${target}$`), this.dirData);
 
             /** if directory block's result's length is 0,
              * then file doesn't exist 
@@ -245,7 +264,7 @@ module TSOS {
                 currPointer = this.keyObjectToString(currBlock.pointer);
             }
 
-            var keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileDataInfo);
+            var keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileData);
             var freeBlocks = keys.map(key => this.read(key));
 
             if (freeBlocks.length != Object.keys(dataPieces).length) {
@@ -264,7 +283,7 @@ module TSOS {
                 /** if the indexed free block's data is swapped and on the current data piece,
                  * avoid joining
                 **/
-                freeBlocks[i].data = isSwap ? dataPieces[i] : dataPieces[i].join("");
+                freeBlocks[i].data = isSwapped ? dataPieces[i] : dataPieces[i].join("");
 
                 freeBlocks[i].availabilityBit = 1;
 
@@ -286,8 +305,8 @@ module TSOS {
             _Disk.initBlock(key);
         }
 
-        public deleteFile(target, isSwap) {
-            var result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
+        public deleteFile(target, isSwapped) {
+            var result = this.searchFiles(new RegExp(`^${target}$`), this.dirData);
 
             if (result.length == 0) return {status: 1, msg: `File '${target}' does not exist`};
 
@@ -320,9 +339,9 @@ module TSOS {
              * else, search for special chars
             **/
             if (flags.includes('l')) {
-                keys = this.searchFiles(new RegExp('.'), this.directoryDataInfo);
+                keys = this.searchFiles(new RegExp('.'), this.dirData);
             } else {
-                keys = this.searchFiles(new RegExp(`^(?!^[${this.specialPrefixes.join('')}])`), this.directoryDataInfo);
+                keys = this.searchFiles(new RegExp(`^(?!^[${this.specialPrefixes.join('')}])`), this.dirData);
             }
 
             var files = keys.map(key => this.translateFromHex(this.read(key).data));
@@ -339,12 +358,12 @@ module TSOS {
                 /** if this isn't formatted,
                  * then can't perform a quick format
                 **/
-                if (!this.formatted) {
+                if (!this.isFormatted) {
                     return {status: 1, msg: "Hard drive must be fully formatted first"};
                 }
 
-                var key = this.keyStringToObject(this.directoryDataInfo.start);
-                var keyLimit = this.keyStringToObject(this.fileDataInfo.end);
+                var key = this.keyStringToObject(this.dirData.start);
+                var keyLimit = this.keyStringToObject(this.fileData.end);
 
                 /*** for t, s, b,
                  * read into block
@@ -375,7 +394,7 @@ module TSOS {
 
             } else if ( flags.includes('full') || flags.length == 0 ) { // No flags, assume full format
                 _Disk.init();
-                this.formatted = true;
+                this.isFormatted = true;
 
                 var processes = _ResidentList.filter( proc => proc.storageLocation == 'hdd' && proc.state != 'terminated');
                 
@@ -390,6 +409,9 @@ module TSOS {
             }
         }
 
+        //
+        // Utility functions
+        //
         public findFreeSpace(amount, dataInfo) {
             var key = this.keyStringToObject(dataInfo.start);
             var keyLimit = this.keyStringToObject(dataInfo.end);

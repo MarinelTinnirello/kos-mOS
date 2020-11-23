@@ -8,6 +8,9 @@
         - "running"         // process is currently running
         - "process"         // process has been pushed into process list
         - "terminated"      // process has been terminated
+     Locations include:
+        - "memory"          // process is in memory
+        - "hdd"             // process is in hard drive
     
     PID increments per loaded input.
     ------------ */
@@ -27,7 +30,9 @@ module TSOS {
                     public waitCycles: number = 0,      // how many cycles it had to wait
                     public executeCycles: number = 0,   // how many cycles it had to execute
                     public segment = {},                // segment object
-                    public state: string = "new") {     // state of PCB
+                    public state: string = "new",       // state of process
+                    public location: string = "memory", // location of process
+                    public swapFile: string = '') {     // swap file's value
         }
     }
 }
