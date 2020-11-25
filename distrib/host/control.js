@@ -229,6 +229,36 @@ var TSOS;
                 table.appendChild(tRow);
             }
         }
+        static hostHddDisplay() {
+            var table = document.getElementById("tableHdd");
+            var tBody = document.createElement('tbody');
+            var row;
+            var pointer;
+            /** check if hard drive is formatted **/
+            if (!_krnDiskDriver.isFormatted) {
+                return;
+            }
+            /*** loop through all tracks, sectors, and blocks
+             * create new cells per row for each component
+            ***/
+            for (var i = 0; i < _Disk.getTrackNum(); i++) {
+                for (var j = 0; j < _Disk.getSectorNum(); j++) {
+                    for (var k = 0; k < _Disk.getBlockNum(); k++) {
+                        var block = sessionStorage.getItem(`${i}:${j}:${k}`);
+                        row = tBody.insertRow(-1);
+                        // insert key
+                        row.insertCell(-1).innerHTML = `${i}:${j}:${k}`;
+                        // insert availability bit
+                        row.insertCell(-1).innerHTML = block[0];
+                        // insert pointer bits
+                        row.insertCell(-1).innerHTML = `${pointer[0]}:${pointer[1]}:${pointer[2]}`;
+                        // insert data
+                        row.insertCell(-1).innerHTML = block.substring(4);
+                    }
+                }
+            }
+            table.replaceChild(tBody, table.tBodies[0]);
+        }
         //
         // Host Button Events
         //
@@ -250,7 +280,8 @@ var TSOS;
             _Memory = new TSOS.Memory();
             _Memory.init();
             _MemoryAccessor = new TSOS.MemoryAccessor();
-            //_MemoryManager = new TSOS.MemoryManager();
+            // ... Create disk
+            _Disk = new TSOS.Disk();
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(TSOS.Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
             // .. and call the OS Kernel Bootstrap routine.

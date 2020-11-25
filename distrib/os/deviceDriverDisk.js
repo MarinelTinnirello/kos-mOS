@@ -1,21 +1,36 @@
+/* ----------------------------------
+   DeviceDriverDisk.ts
+
+   The Kernel Disk Device Driver.
+   The representation of the hard drive.  Made to mimic the Device Driver in terms of setup.
+
+   Note:  With the addition of a file system in Project 4, pretty much anything that touches our programs running
+          need for us to go back and add file system functionality, either by checking if something is formatted,
+          where something's being stored, or if it's been swapped.  So all things memory will be completely edited.
+          Just didn't feel like commenting this all over in my memory files, so I decided to throw this comment here.
+
+   ---------------------------------- */
 var TSOS;
 (function (TSOS) {
     class DeviceDriverDisk extends TSOS.DeviceDriver {
-        constructor(formatted = false, forbiddenPrefixes = ['@'], specialPrefixes = ['@', '.'], masterBootRecord = '0:0:0', directoryDataInfo = { 'type': 'directory', 'start': '0:0:1', 'end': '0:7:7' }, fileDataInfo = { 'type': 'file', 'start': '1:0:0', 'end': '3:7:7' }) {
+        constructor(isFormatted = false, illegalPrefixes = ['@'], specialPrefixes = ['@', '.'], mbr = '0:0:0', dirData = { 'type': 'directory', 'start': '0:0:1', 'end': '0:7:7' }, fileData = { 'type': 'file', 'start': '1:0:0', 'end': '3:7:7' }) {
             super();
-            this.formatted = formatted;
-            this.forbiddenPrefixes = forbiddenPrefixes;
+            this.isFormatted = isFormatted;
+            this.illegalPrefixes = illegalPrefixes;
             this.specialPrefixes = specialPrefixes;
-            this.masterBootRecord = masterBootRecord;
-            this.directoryDataInfo = directoryDataInfo;
-            this.fileDataInfo = fileDataInfo;
+            this.mbr = mbr;
+            this.dirData = dirData;
+            this.fileData = fileData;
             this.driverEntry = this.krnFsDriverEntry;
-            this.isr = this.krnFsDispatchOperation;
+            this.isr = this.krnFsConsoleCmd;
         }
+        //
+        // Kernel functions
+        //
         krnFsDriverEntry() {
             this.status = "loaded";
         }
-        krnFsDispatchOperation(params) {
+        krnFsConsoleCmd(params) {
             var action = params[0]; // Operation to be completed
             var target = params[1]; // Target of operation -- file or directory name
             var data = params[2]; // Any data associated with operation
@@ -26,7 +41,7 @@ var TSOS;
                 _StdOut.putText(result.msg);
             }
             else {
-                if (this.formatted) {
+                if (this.isFormatted) {
                     switch (action) {
                         case 'create': {
                             result = this.create(target, false);
@@ -63,7 +78,10 @@ var TSOS;
                 }
             }
         }
-        create(fileName, isSwap) {
+        //
+        // Console command functionalities
+        //
+        create(fileName, isSwapped) {
             // Checks for files before creation
             /** if file's length is greater than data size,
              * then file is too big
@@ -74,10 +92,10 @@ var TSOS;
             /** if file is found within directory,
              * then file already exists
             **/
-            if (this.searchFiles(new RegExp(`^${fileName}$`), this.directoryDataInfo)[0]) {
+            if (this.searchFiles(new RegExp(`^${fileName}$`), this.dirData)[0]) {
                 return { status: 1, msg: `File with name '${fileName}' already exists` };
             }
-            var key = this.findFreeSpace(1, this.directoryDataInfo)[0];
+            var key = this.findFreeSpace(1, this.dirData)[0];
             /** if there's no key,
              * then there's no space to create file
             **/
@@ -132,14 +150,14 @@ var TSOS;
             data.unshift(block.availability.toString());
             sessionStorage.setItem(key, data.join(''));
         }
-        readFile(target, isSwap) {
-            var result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
+        readFile(target, isSwapped) {
+            var result = this.searchFiles(new RegExp(`^${target}$`), this.dirData);
             if (result.length == 0) {
                 return { status: 1, msg: `File '${target}' does not exist` };
             }
             var dirKey = result[0];
             var dirBlock = this.read(dirKey);
-            var output = isSwap ? [] : '';
+            var output = isSwapped ? [] : '';
             var currBlock;
             var currPointer = this.keyObjectToString(dirBlock.pointerBits);
             while (currPointer != "0:0:0") {
@@ -149,7 +167,7 @@ var TSOS;
                  * turn output into hex
                  * else, concatinate
                 **/
-                if (!isSwap) {
+                if (!isSwapped) {
                     output += this.translateFromHex(currBlock.data);
                 }
                 else {
@@ -160,18 +178,18 @@ var TSOS;
             /** if is swapped and output is of type object,
              * loop through output and get rid of extra 00s
             **/
-            if (isSwap && typeof output == 'object') {
+            if (isSwapped && typeof output == 'object') {
                 while (output[output.length - 1] == '00' && (output[output.length - 2] && output[output.length - 2] == '00')) {
                     output.pop();
                 }
             }
             return { status: 0, msg: output };
         }
-        writeFile(target, data, isSwap) {
+        writeFile(target, data, isSwapped) {
             /** if not a swap file,
              * then don't split data
             **/
-            if (!isSwap) {
+            if (!isSwapped) {
                 data = data.split("");
             }
             // Break up data into an array of arrays each at most 60 characters in length
@@ -179,7 +197,7 @@ var TSOS;
             while (data.length > 0) {
                 dataPieces.push(data.splice(0, _Disk.dataSize));
             }
-            var dirBlockResult = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
+            var dirBlockResult = this.searchFiles(new RegExp(`^${target}$`), this.dirData);
             /** if directory block's result's length is 0,
              * then file doesn't exist
             **/
@@ -198,7 +216,7 @@ var TSOS;
                 this.delete(currPointer);
                 currPointer = this.keyObjectToString(currBlock.pointer);
             }
-            var keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileDataInfo);
+            var keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileData);
             var freeBlocks = keys.map(key => this.read(key));
             if (freeBlocks.length != Object.keys(dataPieces).length) {
                 return { status: 1, msg: `Insufficient space` };
@@ -214,7 +232,7 @@ var TSOS;
                 /** if the indexed free block's data is swapped and on the current data piece,
                  * avoid joining
                 **/
-                freeBlocks[i].data = isSwap ? dataPieces[i] : dataPieces[i].join("");
+                freeBlocks[i].data = isSwapped ? dataPieces[i] : dataPieces[i].join("");
                 freeBlocks[i].availabilityBit = 1;
                 /** if index++ is not the amount of free blocks,
                  * set the indexed's pointer bits to be key string's object
@@ -229,8 +247,8 @@ var TSOS;
         delete(key) {
             _Disk.initBlock(key);
         }
-        deleteFile(target, isSwap) {
-            var result = this.searchFiles(new RegExp(`^${target}$`), this.directoryDataInfo);
+        deleteFile(target, isSwapped) {
+            var result = this.searchFiles(new RegExp(`^${target}$`), this.dirData);
             if (result.length == 0)
                 return { status: 1, msg: `File '${target}' does not exist` };
             var dirKey = result[0];
@@ -256,10 +274,10 @@ var TSOS;
              * else, search for special chars
             **/
             if (flags.includes('l')) {
-                keys = this.searchFiles(new RegExp('.'), this.directoryDataInfo);
+                keys = this.searchFiles(new RegExp('.'), this.dirData);
             }
             else {
-                keys = this.searchFiles(new RegExp(`^(?!^[${this.specialPrefixes.join('')}])`), this.directoryDataInfo);
+                keys = this.searchFiles(new RegExp(`^(?!^[${this.specialPrefixes.join('')}])`), this.dirData);
             }
             var files = keys.map(key => this.translateFromHex(this.read(key).data));
             return { status: 0, msg: files.join(' ') };
@@ -273,11 +291,11 @@ var TSOS;
                 /** if this isn't formatted,
                  * then can't perform a quick format
                 **/
-                if (!this.formatted) {
+                if (!this.isFormatted) {
                     return { status: 1, msg: "Hard drive must be fully formatted first" };
                 }
-                var key = this.keyStringToObject(this.directoryDataInfo.start);
-                var keyLimit = this.keyStringToObject(this.fileDataInfo.end);
+                var key = this.keyStringToObject(this.dirData.start);
+                var keyLimit = this.keyStringToObject(this.fileData.end);
                 /*** for t, s, b,
                  * read into block
                  * skip previously initialized blocks
@@ -303,7 +321,7 @@ var TSOS;
             }
             else if (flags.includes('full') || flags.length == 0) { // No flags, assume full format
                 _Disk.init();
-                this.formatted = true;
+                this.isFormatted = true;
                 var processes = _ResidentList.filter(proc => proc.storageLocation == 'hdd' && proc.state != 'terminated');
                 for (var proc of processes) {
                     _KernelInterruptQueue.enqueue(new TSOS.Interrupt(TERMINATE_PROCESS_IRQ, [proc]));
@@ -314,6 +332,9 @@ var TSOS;
                 return { status: 1, msg: "Supplied flag(s) not valid" };
             }
         }
+        //
+        // Utility functions
+        //
         findFreeSpace(amount, dataInfo) {
             var key = this.keyStringToObject(dataInfo.start);
             var keyLimit = this.keyStringToObject(dataInfo.end);

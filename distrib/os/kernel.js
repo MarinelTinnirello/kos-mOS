@@ -25,10 +25,15 @@ var TSOS;
             _StdIn = _Console;
             _StdOut = _Console;
             // Load the Keyboard Device Driver
-            this.krnTrace("Loading the keyboard device driver.");
+            this.krnTrace("Loading the keyboard device driver...");
             _krnKeyboardDriver = new TSOS.DeviceDriverKeyboard(); // Construct it.
             _krnKeyboardDriver.driverEntry(); // Call the driverEntry() initialization routine.
             this.krnTrace(_krnKeyboardDriver.status);
+            // Load the File Device Driver
+            this.krnTrace("Loading the file device driver...");
+            _krnDiskDriver = new TSOS.DeviceDriverDisk(); // Construct it.
+            _krnDiskDriver.driverEntry(); // Call the driverEntry() initialization routine.
+            this.krnTrace(_krnDiskDriver.status);
             //
             // ... more?
             //
@@ -71,11 +76,11 @@ var TSOS;
                 This, on the other hand, is the clock pulse from the hardware / VM / host that tells the kernel
                 that it has to look for interrupts and process them if it finds any.
             */
-            //_CPU.savePcbState();
             // update all host displays (except CPU) before all the interrupt or execution checks
             // CPU needs to be in execution check cause of Single Step mode
             TSOS.Control.hostMemoryDisplay();
             TSOS.Control.hostPcbDisplay();
+            TSOS.Control.hostHddDisplay();
             // Check for an interrupt, if there are any. Page 560
             if (_KernelInterruptQueue.getSize() > 0) {
                 // Process the first interrupt on the interrupt queue.
@@ -161,6 +166,9 @@ var TSOS;
                 //     break;
                 case CONTEXT_SWITCH_IRQ: // Switches context to current process
                     _MemoryManager.run();
+                    break;
+                case FILE_SYSTEM_IRQ:
+                    _krnDiskDriver.isr(params); // Kernel mode device driver
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");

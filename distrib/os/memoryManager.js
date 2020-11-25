@@ -27,6 +27,13 @@ var TSOS;
                 };
             }
         }
+        clearAllMem(ignoreProcesses) {
+            for (var segment of this.registers) {
+                if (!ignoreProcesses.includes(segment.index)) {
+                    _MemoryAccessor.reset(segment);
+                }
+            }
+        }
         load(program, priority) {
             var segment;
             /*** loop through availability array to check if the current index is available
@@ -39,20 +46,31 @@ var TSOS;
                 }
             }
             var pcb = new TSOS.Pcb();
-            _MemoryAccessor.reset(this.registers[segment]);
             var status;
-            /*** loop through program's length to set the status
-             * if there is no status, break out
-            ***/
-            for (var i = 0; i < program.length; i++) {
-                status = _MemoryAccessor.write(this.registers[segment], i, program[i]);
-                if (!status) {
-                    return;
-                }
+            /** if memory is full
+             * then set location to hard drive
+             * else, run process from CPU
+            **/
+            if (segment === undefined) {
+                // made it it's own function since all I wanted to do was to output some print statements
+                // but I already set the return type to PCB, so it wasn't happening
+                this.loadFromFile(pcb, status, program);
             }
-            // Set availability for current segment and PCB
-            this.isAvailable[segment] = false;
-            pcb.segment = this.registers[segment];
+            else {
+                _MemoryAccessor.reset(this.registers[segment]);
+                /*** loop through program's length to set the status
+                 * if there is no status, break out
+                ***/
+                for (var i = 0; i < program.length; i++) {
+                    status = _MemoryAccessor.write(this.registers[segment], i, program[i]);
+                    if (!status) {
+                        return;
+                    }
+                }
+                // Set availability for current segment and PCB
+                this.isAvailable[segment] = false;
+                pcb.segment = this.registers[segment];
+            }
             // Set priority for current process
             pcb.priority = parseInt(priority) || 0;
             pcb.state = "process";
@@ -60,12 +78,80 @@ var TSOS;
             _ResidentList.push(pcb);
             return pcb;
         }
-        clearAllMem(ignoreProcesses) {
-            for (var segment of this.registers) {
-                if (!ignoreProcesses.includes(segment.index)) {
-                    _MemoryAccessor.reset(segment);
+        //
+        // File functions
+        //
+        loadFromFile(pcb, status, program) {
+            /** if not formatted,
+             * then cannot throw process into hard drive
+            **/
+            if (!_krnDiskDriver.isFormatted) {
+                return _StdOut.putText("No memory available, format hard drive to run another process.");
+            }
+            // create file to put into hard drive
+            pcb.swapFile = `@${pcb.pid}`;
+            status = _krnDiskDriver.create(pcb.swapFile, true);
+            if (status.status) {
+                return _StdOut.putText(status.msg);
+            }
+            // write file into hard drive
+            status = _krnDiskDriver.writeFile(pcb.swapFile, program, true);
+            if (status.status) {
+                return _StdOut.putText(status.msg);
+            }
+        }
+        rollIn(pcb) {
+            var segment;
+            /*** loop through available segments,
+             * if segment is available,
+             * then stick to current segment
+            ***/
+            for (var i = 0; i < this.isAvailable.length; i++) {
+                if (this.isAvailable[i]) {
+                    segment = i;
+                    break;
                 }
             }
+            var program = _krnDiskDriver.readFile(pcb.swapFile, true).msg;
+            var status;
+            _MemoryAccessor.reset(this.registers[segment]);
+            /*** for program's length,
+             * load into current free segment
+            ***/
+            for (var i = 0; i < program.length; i++) {
+                status = _MemoryAccessor.write(this.registers[segment], i, segment);
+                /** if outside limit,
+                 * terminate program
+                **/
+                if (!status) {
+                    return;
+                }
+            }
+            // update segment info
+            this.isAvailable[segment] = false;
+            pcb.segment = this.registers[segment];
+            // delete temp swap file, update location
+            _krnDiskDriver.deleteFile(pcb.swapFile, true);
+            pcb.location = 'memory';
+            return;
+        }
+        rollOut(pcb) {
+            var programs = [];
+            /*** for segment size,
+             * grab program
+            ***/
+            for (var i = 0; i < MEMORY_SIZE; i++) {
+                programs.push(_MemoryAccessor.read(pcb.segment, i));
+            }
+            this.isAvailable[pcb.segment.index] = true;
+            // update PCB info
+            pcb.swapFile = `@${pcb.pid}`;
+            pcb.location = 'hdd';
+            pcb.segment = {};
+            // create temp swap file, write program
+            _krnDiskDriver.create(pcb.swapFile, true);
+            _krnDiskDriver.writeFile(pcb.swapFile, programs, true);
+            return;
         }
         //
         // Dispatcher functions

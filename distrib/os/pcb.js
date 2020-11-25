@@ -8,6 +8,9 @@
         - "running"         // process is currently running
         - "process"         // process has been pushed into process list
         - "terminated"      // process has been terminated
+     Locations include:
+        - "memory"          // process is in memory
+        - "hdd"             // process is in hard drive
     
     PID increments per loaded input.
     ------------ */
@@ -25,7 +28,9 @@ var TSOS;
         waitCycles = 0, // how many cycles it had to wait
         executeCycles = 0, // how many cycles it had to execute
         segment = {}, // segment object
-        state = "new") {
+        state = "new", // state of process
+        location = "memory", // location of process
+        swapFile = '') {
             this.pid = pid;
             this.priority = priority;
             this.PC = PC;
@@ -38,6 +43,8 @@ var TSOS;
             this.executeCycles = executeCycles;
             this.segment = segment;
             this.state = state;
+            this.location = location;
+            this.swapFile = swapFile;
         }
     }
     TSOS.Pcb = Pcb;

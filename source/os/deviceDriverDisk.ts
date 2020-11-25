@@ -16,7 +16,7 @@ module TSOS {
 
         constructor(
             public isFormatted = false,
-            public forbiddenPrefixes = ['@'],
+            public illegalPrefixes = ['@'],
             public specialPrefixes = ['@', '.'],
             public mbr = '0:0:0',
             public dirData = {'type': 'directory', 'start': '0:0:1', 'end': '0:7:7'},

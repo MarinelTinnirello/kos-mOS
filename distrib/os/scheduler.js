@@ -53,6 +53,34 @@ var TSOS;
         runNextProcess() {
             /** check if there's a process currently running **/
             if (this.currProcess !== null || this.currProcess.pid !== _ReadyQueue[0].pid) {
+                /** checks if location of current process is in hard drive **/
+                if (_ReadyQueue[0].location == "hdd") {
+                    var segment;
+                    /** loop through all available segments
+                     * check if there's any available segments
+                    **/
+                    for (var i = 0; i < _MemoryManager.isAvailable.length; i++) {
+                        if (_MemoryManager.isAvailable[i]) {
+                            segment = i;
+                            break;
+                        }
+                    }
+                    /** if there's no available segments,
+                     * then roll out process
+                    **/
+                    if (segment === undefined) {
+                        var processInMemory = _ResidentList.filter(process => {
+                            return process.location == "memory" &&
+                                (process.state == "ready" || process.state == "process");
+                        });
+                        _Kernel.krnTrace("Rolling out process...");
+                        _MemoryManager.rollOut(processInMemory[processInMemory.length - 1]);
+                    }
+                    _Kernel.krnTrace("Rolling in process...");
+                    _MemoryManager.rollIn(_ReadyQueue[0]);
+                }
+                // switches context
+                // necessary for all, but as of Project 4, we need to check the location of our process 1st
                 _Kernel.krnTrace("Context switch in progress...");
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONTEXT_SWITCH_IRQ, []));
             }
@@ -61,6 +89,10 @@ var TSOS;
             currProcess.state = "terminated";
             _ReadyQueue = _ReadyQueue.filter(val => val.pid != currProcess.pid);
             _MemoryManager.isAvailable[currProcess.segment.index] = true;
+            /** check if current process's location is in hard drive **/
+            if (currProcess.location == 'hdd') {
+                _krnDiskDriver.deleteFile(currProcess.swapFile, true);
+            }
             _StdOut.advanceLine();
             _StdOut.putText(`Process: ${currProcess.pid} terminated.`);
             _StdOut.advanceLine();

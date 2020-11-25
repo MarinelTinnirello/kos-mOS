@@ -23,7 +23,7 @@ const TERMINATE_PROCESS_IRQ = 4; // terminate process from CPU interrupt
 const SYSCALL_IRQ = 5; // system call interrupt
 const KILL_PROCESS_IRQ = 6; // terminate process interrupt
 const CONTEXT_SWITCH_IRQ = 7; // context switch interrupt
-const KILL_ALL_PROCESS_IRQ = 8; // terminate all processes interrupt
+const FILE_SYSTEM_IRQ = 8; // run file system interrupt
 // Memory
 const MEMORY_SIZE = 256; // size of a memory segment
 const NUM_OF_SEGMENTS = 3; // number of memory segments
@@ -37,7 +37,7 @@ var _Memory; // Utilize TypeScript's type annotation system to ensure that _Memo
 var _MemoryAccessor; // Utilize TypeScript's type annotation system to ensure that _MemoryAccessor is an instance of the MemoryAccessor class.
 var _MemoryManager; // Utilize TypeScript's type annotation system to ensure that _MemoryManager is an instance of the MemoryManager class.
 var _Scheduler; // Utilize TypeScript's type annotation system to ensure that _Scheduler is an instance of the Scheduler class.
-var _Disk = TSOS.Disk; // Utilize TypeScript's type annotation system to ensure that _Disk is an instance of the Disk class.
+var _Disk; // Utilize TypeScript's type annotation system to ensure that _Disk is an instance of the Disk class.
 var _OSclock = 0; // Page 23.
 // Processes
 var _PidCount = 0; // counts PIDs over runtime
@@ -69,7 +69,7 @@ var _OsShell;
 var _SarcasticMode = false;
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver = null;
-var _krnDiskDriver;
+var _krnDiskDriver = null;
 var _hardwareClockID = null;
 // For testing (and enrichment)...
 var Glados = null; // This is the function Glados() in glados-ip*.js http://alanclasses.github.io/TSOS/test/ .
