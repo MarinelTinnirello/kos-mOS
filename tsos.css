@@ -1,13 +1,40 @@
 /* TSOS.css */
 
 body {
-  background: #909193 url(distrib/images/linen.png) repeat;
+  /* background: #909193 url(distrib/images/linen.png) repeat; */
   font-family: Helvetica, Verdana, Arial, sans-serif;
   font-size: 12pt;
   font-weight: normal;
   font-style: normal;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
+textarea {
+  resize: none;
+  border: 2px solid #a2d2df;
+  box-shadow: 0 0 6px #a2d2df;
+}
+
+tbody, thead, tr {
+  border: 2px solid #a2d2df;
+  box-shadow: 0 0 6px #a2d2df;
+}
+
+thead {
+  font-weight: bold;
+  color: whitesmoke;
+  text-shadow: 2px 2px 5px whitesmoke;
+}
+
+.container {
+  max-width: none !important;
+}
+
+/**** Text formatting ****/
 h1 {
   color: black;
   font-size: 24pt;
@@ -47,23 +74,58 @@ p1 {
               anim-cursor 600ms steps(29, end) infinite;
 }
 
+/**** Container formatting ****/
 #display {
-  background-color:#DFDBC3;
-  border: 2px solid red;
+  background-color: rgba(35, 35, 35, 0.4);
+  border: 2px solid #a2d2df;
+  box-shadow: 0 0 6px #a2d2df;
   cursor: default;
 }
 
+#divMain {
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+#taHostLog {
+  height: 10rem;
+  background-color: rgba(35, 35, 35, 0.4);
+  color: whitesmoke;
+}
+
+#taProgramInput {
+  height: 8rem;
+  background-color: rgba(35, 35, 35, 0.4);
+  color: whitesmoke;
+}
+
+#tableCpu, #tableMemory, #tablePcb, #tableHdd {
+  background-color: rgba(35, 35, 35, 0.4);
+  color: #a2d2df;
+  text-shadow: 2px 2px 5px #a2d2df;
+}
+
 .normal_button {
-  width: 100px;
+  width: 96px;
+}
+
+.label-header {
+  color: whitesmoke;
+  font-size: 12pt;
+  text-shadow: 2px 2px 5px whitesmoke;
 }
 
 .footerText {
-  color: black;
+  color: whitesmoke;
+  text-shadow: 2px 2px 5px whitesmoke;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 8pt;
   text-align: center;
 }
 
+
+/**** BSOD ****/
 .overlay {
   height: 100%;
   width: 0;
@@ -106,4 +168,69 @@ p1 {
   background-image: linear-gradient(#55cdfc, #f7a8b8, #fff, #f7a8b8, #55cdfc);
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  margin-top: 50%;
+}
+
+/**** Cube background ****/
+.cube-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  perspective: 1500px;
+  z-index: -1;
+}
+
+.cube-area {
+  position: relative;
+  transform-style: preserve-3d;
+  animation-name: rotate;
+  animation-duration: 30s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.cube {
+  position: absolute;
+  width: 2000px;
+  height: 2000px;
+  border: 2px solid #262626;
+}
+
+.box-front {
+  transform: translateX(-1000px) translateY(-1000px) translateZ(1000px);
+  background-color: rgba(37, 124, 163, 0.8);
+}
+
+.box-back {
+  transform: translateX(-1000px) translateY(-1000px) translateZ(-1000px);
+  background-color: rgba(37, 124, 163, 0.8);
+}
+
+.box-right {
+  transform: translateY(-1000px) rotateY(90deg);
+  background-color: rgba(37, 124, 163, 0.8);
+}
+
+.box-left {
+  transform: translateX(-2000px) translateY(-1000px) rotateY(90deg);
+  background-color: rgba(37, 124, 163, 0.8);
+}
+
+.box-bottom {
+  transform: translateX(-1000px) rotateX(90deg);
+  background-color: rgba(37, 124, 163, 0.8);
+}
+
+.box-top {
+  transform: translateX(-1000px) translateY(-2000px) rotateX(90deg);
+  background-color: rgba(37, 124, 163, 0.8);
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate3d(0, 0, 0, 0);
+  }
+  100% {
+    transform: rotate3d(0, 1, 0, 360deg);
+  }
 }

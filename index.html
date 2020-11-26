@@ -33,12 +33,16 @@
    <script type="text/javascript" src="distrib/os/pcb.js"></script>
    <script type="text/javascript" src="distrib/os/memoryManager.js"></script>
    <script type="text/javascript" src="distrib/os/scheduler.js"></script>
-   <script type="text/javascript" src="distrib/os/deviceDiskDriver.js"></script>
+   <script type="text/javascript" src="distrib/os/deviceDriverDisk.js"></script>
 
    <!-- Other Routines -->
    <script type="text/javascript" src="distrib/utils.js"></script>
    <!-- Uncomment the line below to enable GLaDOS testing. -->
    <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip4.js"></script>
+
+   <!-- Materialize.js Library for formatting -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
    
 </head>
 
@@ -46,7 +50,191 @@
 
 <div id="divMain" style="width:100%;">
 
-   <div id="divButtonBar" style="margin:4px;">
+   <div class="containter">
+
+      <div class="row">
+         <div class="col s3">
+
+            <div id="divLog">
+               <label class="center-align">
+                  <div class="label-header">Host Log</div>
+                  <textarea name="taHostLog"
+                            id  ="taHostLog"
+                            rows="16"
+                            cols="48"
+                            readonly
+                  ></textarea>
+               </label>
+            </div>
+
+            <div id="divUserProgramInput">
+               <label class="center-align">
+                  <div class="label-header">User Program Input</div>
+                  <textarea name="taProgramInput"
+                            id  ="taProgramInput"
+                            rows="8"
+                            cols="48"
+                  ></textarea>
+               </label>
+            </div>
+
+            <div id="divPcb">
+               <div id="displayPcb">
+                  <label class="center-align">
+                     <div class="label-header">PCB</div>
+                     <table id="tablePcb" 
+                            style="text-align: center;">
+                        <thead>
+                           <tr>
+                              <td>PID</td>
+                              <td>PC</td>
+                              <td>Acc</td>
+                              <td>X</td>
+                              <td>Y</td>
+                              <td>Z</td>
+                              <td>Priority</td>
+                              <td>State</td>
+                           </tr>
+                        </thead>
+                     </table>
+                  </label>
+               </div>
+            </div>
+
+         </div>
+
+         <div class="col s6">
+            
+            <div id="divButtonBar">
+               <input type="button"
+                  id = "btnStartOS"
+                  name="brnStartOS"
+                  class="normal_button"
+                  value="Start"
+                  tabindex="0"
+                  onclick="TSOS.Control.hostBtnStartOS_click(this);">
+
+               <input type="button"
+                     id = "btnHaltOS"
+                     name="brnHaltOS"
+                     class="normal_button"
+                     disabled="disabled"
+                     value="Halt"
+                     tabindex="1"
+                     onclick="TSOS.Control.hostBtnHaltOS_click(this);">
+
+               <input type="button"
+                     id = "btnReset"
+                     name="brnReset"
+                     class="normal_button"
+                     disabled="disabled"
+                     value="Reset"
+                     tabindex="2"
+                     onclick="TSOS.Control.hostBtnReset_click(this);">
+
+               <input type="button"
+                     id = "btnSingleStepMode"
+                     name="brnSingleStepMode"
+                     class="normal_button"
+                     disabled="disabled"
+                     value="Single Step"
+                     tabindex="2"
+                     onclick="TSOS.Control.hostBtnSingleStepMode_click(this);">
+
+               <input type="button"
+                     id = "btnNextStepMode"
+                     name="brnNextStepMode"
+                     class="normal_button"
+                     disabled="disabled"
+                     value="Next Step"
+                     tabindex="2"
+                     onclick="TSOS.Control.hostBtnNextStepMode_click(this);">
+            </div>
+
+            <div id="divConsole">
+               <canvas id="display"
+                       width="500px"
+                       height="500px"
+                       tabindex="3"
+                       style="width:500px; height:500px;">
+               </canvas>
+         
+               <div id="divDisplayAddons">
+                  <label id="Time"></label>
+                  <label id="Status"></label>
+               </div>
+            </div>
+
+         </div>
+
+         <div class="col s3">
+
+            <div id="divCpu">
+               <div id="displayCpu">
+                  <label class="center-align">
+                     <div class="label-header">CPU</div>
+                     <table id="tableCpu" 
+                         style="table-layout: fixed; text-align: center;">
+                        <thead>
+                           <tr>
+                              <td>PC</td>
+                              <td>Acc</td>
+                              <td>IR</td>
+                              <td>X</td>
+                              <td>Y</td>
+                              <td>Z</td>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>0</td>
+                              <td>0</td>
+                              <td>0</td>
+                              <td>0</td>
+                              <td>0</td>
+                              <td>0</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </label>
+               </div>
+            </div>
+
+            <div id="divMemory">
+               <div id="displayMemory">
+                  <label class="center-align">
+                     <div class="label-header">Memory</div>
+                     <table id="tableMemory"
+                            style="overflow-y: scroll; display: block; height: 150px;">
+                        <tbody></tbody>
+                     </table>
+                  </label>
+               </div>
+            </div>
+         
+            <div id="divHdd">
+               <label class="center-align">
+                  <div class="label-header">HDD</div>
+                  <table id="tableHdd" 
+                         style="overflow-x: scroll; overflow-y: scroll; display: block; height: 250px; ">
+                     <thead>
+                        <tr>
+                           <th>T:S:B</th>
+                           <th>Availability Bit</th>
+                           <th>Pointer Bits</th>
+                           <th>Data</th>
+                        </tr>
+                     </thead>
+                  </table>
+               </label>
+            </div>
+
+         </div>
+
+      </div>
+   </div>
+
+   <!-- <div id="divButtonBar" style="margin:4px;">
       <input type="button"
              id = "btnStartOS"
              name="brnStartOS"
@@ -200,17 +388,46 @@
             </thead>
          </table>
       </label>
+   </div> -->
+
+</div>
+
+<div class="cube-wrapper">
+   <div class="cube-area">
+      <div class="cube box-front">
+         <div class="ascii-art">
+            ████████╗██████╗░░█████╗░███╗░░██╗░██████╗  ██╗░░░░░██╗██╗░░░██╗███████╗░██████╗
+            ╚══██╔══╝██╔══██╗██╔══██╗████╗░██║██╔════╝  ██║░░░░░██║██║░░░██║██╔════╝██╔════╝
+            ░░░██║░░░██████╔╝███████║██╔██╗██║╚█████╗░  ██║░░░░░██║╚██╗░██╔╝█████╗░░╚█████╗░
+            ░░░██║░░░██╔══██╗██╔══██║██║╚████║░╚═══██╗  ██║░░░░░██║░╚████╔╝░██╔══╝░░░╚═══██╗
+            ░░░██║░░░██║░░██║██║░░██║██║░╚███║██████╔╝  ███████╗██║░░╚██╔╝░░███████╗██████╔╝
+            ░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝╚═════╝░  ╚══════╝╚═╝░░░╚═╝░░░╚══════╝╚═════╝░
+            
+            ███╗░░░███╗░█████╗░████████╗████████╗███████╗██████╗░
+            ████╗░████║██╔══██╗╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗
+            ██╔████╔██║███████║░░░██║░░░░░░██║░░░█████╗░░██████╔╝
+            ██║╚██╔╝██║██╔══██║░░░██║░░░░░░██║░░░██╔══╝░░██╔══██╗
+            ██║░╚═╝░██║██║░░██║░░░██║░░░░░░██║░░░███████╗██║░░██║
+            ╚═╝░░░░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░░░░╚═╝░░░╚══════╝╚═╝░░╚═╝
+         </div>
+      </div>
+      <div class="cube box-right"></div>
+      <div class="cube box-back"></div>
+      <div class="cube box-left"></div>
+      <div class="cube box-top"></div>
+      <div class="cube box-bottom"></div>
    </div>
 </div>
 
 <p class="footerText" style="clear:both;">
    <br>
-   Copyright &copy; 2020 <a href="https://marineltinnirello.com">Marinel Tinnirello</a>.
+   Copyright &copy; 2020 
+   <a href="https://marineltinnirello.com" style="color: #a2d2df; text-shadow: 2px 2px 5px #a2d2df">Marinel Tinnirello</a>.
    <br> Xenosaga belongs to Monolith Soft, Namco Bandai, and Tetsuya Takahashi.
    <br>
 </p>
 
-<div class="ascii-art">
+<!-- <div class="ascii-art">
 
    ████████╗██████╗░░█████╗░███╗░░██╗░██████╗  ██╗░░░░░██╗██╗░░░██╗███████╗░██████╗
    ╚══██╔══╝██╔══██╗██╔══██╗████╗░██║██╔════╝  ██║░░░░░██║██║░░░██║██╔════╝██╔════╝
@@ -225,7 +442,7 @@
    ██║╚██╔╝██║██╔══██║░░░██║░░░░░░██║░░░██╔══╝░░██╔══██╗
    ██║░╚═╝░██║██║░░██║░░░██║░░░░░░██║░░░███████╗██║░░██║
    ╚═╝░░░░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░░░░╚═╝░░░╚══════╝╚═╝░░╚═╝
-</div>
+</div> -->
 
 <div id="overlay" class="overlay">
    <div class="overlay-content">

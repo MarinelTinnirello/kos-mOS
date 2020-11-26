@@ -135,7 +135,7 @@ var TSOS;
                          * we want that extra "-1" due to the PC being incremented at the end of a cycle
                         **/
                         if ((_CPU.Pcb.segment.base + _CPU.PC - opCodeMap[currOp].pcNum - 1) == p_addr) {
-                            cell.style.background = "#00adec";
+                            cell.style.background = "#55cdfc";
                             highlightCell = cell;
                             opHighlights[0] = opCodeMap[currOp].pcNum;
                             opHighlights[1] = false;
@@ -148,7 +148,7 @@ var TSOS;
                         }
                         /** if the 1st index is greater than 0 and there's something in the 2nd, highlight pink **/
                         if ((opHighlights[0] > 0) && opHighlights[1]) {
-                            cell.style.background = "#ff00ff";
+                            cell.style.background = "#f7a8b8";
                             highlightCell = cell;
                             opHighlights[0]--;
                         }
@@ -161,6 +161,7 @@ var TSOS;
                 }
                 table.replaceChild(tBody, table.tBodies[0]);
                 // TODO: maybe throw this back in
+                // don't throw back in, slows program to a crawl
                 // /** if highlighted cell, scroll into view **/
                 // if (highlightCell) {
                 //     highlightCell.scrollIntoView(true);

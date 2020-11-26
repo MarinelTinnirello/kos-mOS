@@ -22,8 +22,8 @@ module TSOS {
             for (var i = 0; i < MEMORY_SIZE / NUM_OF_SEGMENTS; i++) {
                 this.isAvailable[i] = true;
                 this.registers[i] = { index: i,
-                                        base: MEMORY_SIZE * i,
-                                        limit: MEMORY_SIZE * (i + 1) 
+                                      base: MEMORY_SIZE * i,
+                                      limit: MEMORY_SIZE * (i + 1) 
                                     };
             }
         }

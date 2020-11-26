@@ -148,7 +148,7 @@ module TSOS {
             var addr = parseInt(swapStr, 16);
             var val = this.Acc.toString(16);
 
-            _MemoryAccessor.write(this.Pcb.segment,addr, val);
+            _MemoryAccessor.write(this.Pcb.segment, addr, val);
             this.PC += 3;
         }
 

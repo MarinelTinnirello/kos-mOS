@@ -180,6 +180,7 @@ module TSOS {
             }
 
             var data = Object.values(block.pointer).concat(block.data);
+            
             data.unshift( block.availability.toString() );
             sessionStorage.setItem( key, data.join('') );
         }

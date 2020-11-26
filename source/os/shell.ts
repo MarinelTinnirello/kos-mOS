@@ -79,13 +79,13 @@ module TSOS {
                                     " - Displays the current date and time");
             this.commandList[this.commandList.length] = sc;
 
-            // where am I
+            // whereami
             sc = new ShellCommand(this.shellWhereAmI,
                                     "whereami",
                                     " - Displays where you are in the U.M.N.");
             this.commandList[this.commandList.length] = sc;
 
-            // ye shall be as gods
+            // yeshallbeasgods
             sc = new ShellCommand(this.shellYeShallBeAsGods,
                                     "yeshallbeasgods",
                                     " - Knowing good and evil?");
@@ -106,7 +106,7 @@ module TSOS {
             // load
             sc = new ShellCommand(this.shellLoad,
                                     "load",
-                                    "- Loads program from User Program Input.");
+                                    "<priority> - Loads program from User Program Input.  Priority optional, except in Priority scheduling.");
             this.commandList[this.commandList.length] = sc;
 
             // run
@@ -149,6 +149,54 @@ module TSOS {
             sc = new ShellCommand(this.shellQuantum,
                                     "quantum",
                                     "<int> - Sets quantum for Round Robin scheduling.");
+            this.commandList[this.commandList.length] = sc;
+
+            // getscheduler
+            sc = new ShellCommand(this.shellGetSchedule,
+                                    "getschedule",
+                                    "Gets the current scheduler algorithm type.");
+            this.commandList[this.commandList.length] = sc;
+
+            // setscheduler
+            sc = new ShellCommand(this.shellGetSchedule,
+                                    "setschedule",
+                                    "<type (rr, fcfs, pri)> - Sets the scheduler algorithm type to Round Robin, First Come First Serve, or Priority.");
+            this.commandList[this.commandList.length] = sc;
+
+            // ls
+            sc = new ShellCommand(this.shellLs,
+                                    "ls",
+                                    "<-l> - Lists files in directory. Params is optional, but includes special files in the list.");
+            this.commandList[this.commandList.length] = sc;
+
+            // format
+            sc = new ShellCommand(this.shellFormat,
+                                    "format",
+                                    "<-quick, -full> - Initializes data blocks.  Quick only initializes 1st 4, Full initializes entire block.");
+            this.commandList[this.commandList.length] = sc;
+
+            // create
+            sc = new ShellCommand(this.shellCreate,
+                                    "create",
+                                    "<filename> - Creates file.");
+            this.commandList[this.commandList.length] = sc;
+
+            // read
+            sc = new ShellCommand(this.shellRead,
+                                    "read",
+                                    "<filename> - Outputs contents of specified file.");
+            this.commandList[this.commandList.length] = sc;
+
+            // write
+            sc = new ShellCommand(this.shellWrite,
+                                    "write",
+                                    "<filename> <text> - Writes data within quotes to specified file.");
+            this.commandList[this.commandList.length] = sc;
+
+            // delete
+            sc = new ShellCommand(this.shellDelete,
+                                    "delete",
+                                    "<filename> - Deletes file.");
             this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
@@ -350,7 +398,7 @@ module TSOS {
                         _StdOut.putText("Sets the status to be <string>.");
                         break;
                     case "load":
-                        _StdOut.putText("Loads program from User Program Input.");
+                        _StdOut.putText("Loads program from User Program Input.  Priority optional, except in Priority scheduling.");
                         break;
                     case "run":
                         _StdOut.putText("Runs specified process.");
@@ -372,6 +420,30 @@ module TSOS {
                         break;
                     case "quantum":
                         _StdOut.putText("Sets specified quantum for Round Robin scheduling.");
+                        break;
+                    case "getschedule":
+                        _StdOut.putText("Gets the current scheduler algorithm type.");
+                        break;
+                    case "setschedule":
+                        _StdOut.putText("Sets the scheduler algorithm type to Round Robin, First Come First Serve, or Priority.  Default is Round Robin.");
+                        break;
+                    case "ls":
+                        _StdOut.putText("Lists files in directory. Params is optional, but includes special files in the list.");
+                        break;
+                    case "format":
+                        _StdOut.putText("Initializes data blocks.  Quick only initializes 1st 4, Full initializes entire block.  Will terminate any processes stored.");
+                        break;
+                    case "create":
+                        _StdOut.putText("Creates file.");
+                        break;
+                    case "read":
+                        _StdOut.putText("Outputs contents of specified file.");
+                        break;
+                    case "write":
+                        _StdOut.putText("Writes data within quotes to specified file.");
+                        break;
+                    case "delete":
+                        _StdOut.putText("Deletes file.");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -534,10 +606,16 @@ module TSOS {
                     var hexPair = programArr.match(/.{2}/g);
                     var Pcb = _MemoryManager.load(hexPair, args[0]);
 
+                    /* As of Project 4, the standard "Program loaded" now gives the location 
+                     * of the process as either "memory" (default) or "hdd"
+                    */
                     if (Pcb) {
-                        // in order to use formatting for pid, you need to use " ` ` "
-                        // "" treats text like a literal, `` allows for templating
-                        _StdOut.putText(`Program loaded - PID: ${Pcb.pid}`);
+                        // if (Pcb.location == "memory") {
+                        //     _StdOut.putText(`Program loaded - PID: ${Pcb.pid}, into memory segment ${Pcb.segment.index}.`);
+                        // } else {
+                        //     _StdOut.putText(`Program loaded - PID: ${Pcb.pid}, into hard drive.`);
+                        // }
+                        _StdOut.putText(`Program loaded - PID: ${Pcb.pid}.`);
                     }
                     
                 } else {
@@ -648,6 +726,111 @@ module TSOS {
                 _Scheduler.quantum = parseInt(args[0]);
             } else {
                 _StdOut.putText("Usage: kill <pid>  Please supply a integer.");
+            }
+        }
+
+        public shellGetSchedule(args): void {
+            _StdOut.putText(`Current scheduling algorithm: ${_Scheduler.availableSchedulerType[_Scheduler.currSchedulerType]}`);
+        }
+
+        public shellSetSchedule(args): void {
+            if (args.length > 0) {
+                if (Object.keys(_Scheduler.availableSchedulerType).includes(args[0])) {
+                    _StdOut.putText(`Scheduling algorithm set to: ${_Scheduler.availableSchedulerType[args[0]]}.`);
+                    _Scheduler.currSchedulerType = args[0];
+                } else {
+                    _StdOut.putText(`Scheduler: ${args[0]} is invalid.`);
+                }
+            }
+        }
+
+        public shellLs(args) {
+            // grab flags, removes dashes
+            args = args.filter(val => val[0] == "-").map(flag => flag.substring(1));
+            // interrupt sends table info
+            _KernelInterruptQueue.enqueue(new Interrupt(FILE_SYSTEM_IRQ, ['list', null, null, args]));
+        }
+
+        public shellFormat(args) {
+            // grab flags, removes dashes
+            args = args.filter(val => val[0] == "-").map(flag => flag.substring(1));
+            // interrupt sends table info
+            _KernelInterruptQueue.enqueue(new Interrupt(FILE_SYSTEM_IRQ, ['format', null, null, args]));
+        }
+
+        public shellCreate(args) {
+            if (args.length > 0) {
+                args.unshift('create');
+
+                /** check if file name starts with illegal char **/
+                if (_krnDiskDriver.illegalPrefixes.includes(args.slice(0, 2)[1][0])) {
+                    return _StdOut.putText(`File name: ${args.slice(0, 2)[1][0]} is invalid.`);
+                }
+                
+                _KernelInterruptQueue.enqueue(new Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 2)));
+            } else {
+                _StdOut.putText("Usage: create <filename>  Please supply a file name.");
+            }
+        }
+
+        public shellRead(args) {
+            if (args.length > 0) {
+                args.unshift('read');
+                
+                _KernelInterruptQueue.enqueue(new Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 2)));
+            } else {
+                _StdOut.putText("Usage: read <filename>  Please supply a file name.");
+            }
+        }
+
+        public shellWrite(args) {
+            if (args.length > 0) {
+                var file = args.shift();
+                var indices = [];
+
+                /** checks if attempting to edit swap file **/
+                if (file[0] == '@') {
+                    return _StdOut.putText("Swap files cannot be edited.");
+                }
+
+                args = args.join(" ").split("");
+                args.filter((val, ind) => {
+                    /** check if contains quote chars **/
+                    if (val == '""') {
+                        indices.push(ind);
+                    }
+                });
+
+                /** check if surrounded by quote chars **/
+                if (indices.length < 2) {
+                    return _StdOut.putText("File name and data need to be surrounded by quotes.");
+                }
+
+                var data = args.splice(indices[0] + 1, indices[1] - indices[0] - 1).join("");
+
+                /** if empty, then add a space char **/
+                if (data.length == 0) {
+                    data = ' ';
+                }
+                
+                _KernelInterruptQueue.enqueue(new Interrupt(FILE_SYSTEM_IRQ, ['write', file, data]));
+            } else {
+                _StdOut.putText("Usage: write <filename> <text>  Please supply a file name.");
+            }
+        }
+
+        public shellDelete(args) {
+            if (args.length > 0) {
+                /** checks if attempting to delete swap file **/
+                if (args[0][0] == '@') {
+                    return _StdOut.putText("Swap files cannot be deleted.");
+                }
+
+                args.unshift('delete');
+                
+                _KernelInterruptQueue.enqueue(new Interrupt(FILE_SYSTEM_IRQ, args.slice(0, 2)));
+            } else {
+                _StdOut.putText("Usage: delete <filename>  Please supply a file name.");
             }
         }
     }
