@@ -88,7 +88,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellGetSchedule, "getschedule", "Gets the current scheduler algorithm type.");
             this.commandList[this.commandList.length] = sc;
             // setscheduler
-            sc = new TSOS.ShellCommand(this.shellGetSchedule, "setschedule", "<type (rr, fcfs, pri)> - Sets the scheduler algorithm type to Round Robin, First Come First Serve, or Priority.");
+            sc = new TSOS.ShellCommand(this.shellSetSchedule, "setschedule", "<type (rr, fcfs, pri)> - Sets the scheduler algorithm type to Round Robin, First Come First Serve, or Priority.");
             this.commandList[this.commandList.length] = sc;
             // ls
             sc = new TSOS.ShellCommand(this.shellLs, "ls", "<-l> - Lists files in directory. Params is optional, but includes special files in the list.");
@@ -488,12 +488,13 @@ var TSOS;
                      * of the process as either "memory" (default) or "hdd"
                     */
                     if (Pcb) {
-                        // if (Pcb.location == "memory") {
-                        //     _StdOut.putText(`Program loaded - PID: ${Pcb.pid}, into memory segment ${Pcb.segment.index}.`);
-                        // } else {
-                        //     _StdOut.putText(`Program loaded - PID: ${Pcb.pid}, into hard drive.`);
-                        // }
-                        _StdOut.putText(`Program loaded - PID: ${Pcb.pid}.`);
+                        if (Pcb.location == "memory") {
+                            _StdOut.putText(`Program loaded - PID: ${Pcb.pid}, into memory segment ${Pcb.segment.index}.`);
+                        }
+                        else {
+                            _StdOut.putText(`Program loaded - PID: ${Pcb.pid}, into hard drive.`);
+                        }
+                        //_StdOut.putText(`Program loaded - PID: ${Pcb.pid}.`);
                     }
                 }
                 else {
@@ -657,14 +658,14 @@ var TSOS;
                 }
                 args = args.join(" ").split("");
                 args.filter((val, ind) => {
-                    /** check if contains quote chars **/
-                    if (val == '""') {
+                    /** check if contains quote char at all **/
+                    if (val == '"') {
                         indices.push(ind);
                     }
                 });
                 /** check if surrounded by quote chars **/
                 if (indices.length < 2) {
-                    return _StdOut.putText("File name and data need to be surrounded by quotes.");
+                    return _StdOut.putText("Specify file name and surround data by quotes.");
                 }
                 var data = args.splice(indices[0] + 1, indices[1] - indices[0] - 1).join("");
                 /** if empty, then add a space char **/
@@ -674,7 +675,7 @@ var TSOS;
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(FILE_SYSTEM_IRQ, ['write', file, data]));
             }
             else {
-                _StdOut.putText("Usage: write <filename> <text>  Please supply a file name.");
+                _StdOut.putText(`Usage: write <filename> "<text>"  Please supply a file name.`);
             }
         }
         shellDelete(args) {

@@ -13,7 +13,13 @@
 var TSOS;
 (function (TSOS) {
     class DeviceDriverDisk extends TSOS.DeviceDriver {
-        constructor(isFormatted = false, illegalPrefixes = ['@'], specialPrefixes = ['@', '.'], mbr = '0:0:0', dirData = { 'type': 'directory', 'start': '0:0:1', 'end': '0:7:7' }, fileData = { 'type': 'file', 'start': '1:0:0', 'end': '3:7:7' }) {
+        constructor(isFormatted = false, // checks if drive is formatted
+        illegalPrefixes = ['@'], // files can't start with these names
+        specialPrefixes = ['@', '.'], // for things like swap files
+        mbr = '0:0:0', // MBR key
+        dirData = { 'type': 'directory', 'start': '0:0:1', 'end': '0:7:7' }, // info on  dir on drive
+        fileData = { 'type': 'file', 'start': '1:0:0', 'end': '3:7:7' } // info on file on drive
+        ) {
             super();
             this.isFormatted = isFormatted;
             this.illegalPrefixes = illegalPrefixes;
@@ -31,9 +37,9 @@ var TSOS;
             this.status = "loaded";
         }
         krnFsConsoleCmd(params) {
-            var action = params[0]; // Operation to be completed
-            var target = params[1]; // Target of operation -- file or directory name
-            var data = params[2]; // Any data associated with operation
+            var action = params[0]; // Action to be completed
+            var target = params[1]; // File or directory name of action
+            var data = params[2]; // Data associated with action
             var flags = params[3]; // Flags that modify action
             var result;
             if (action == 'format') {
@@ -89,6 +95,7 @@ var TSOS;
             if (fileName.length > _Disk.getDataSize()) {
                 return { status: 1, msg: `File name '${fileName}' is too big` };
             }
+            // TODO: fix this, searchFiles makes block null
             /** if file is found within directory,
              * then file already exists
             **/
@@ -146,8 +153,8 @@ var TSOS;
                     block.data.push('00');
                 }
             }
-            var data = Object.values(block.pointer).concat(block.data);
-            data.unshift(block.availability.toString());
+            var data = Object.values(block.pointerBits).concat(block.data);
+            data.unshift(block.availabilityBit.toString());
             sessionStorage.setItem(key, data.join(''));
         }
         readFile(target, isSwapped) {
@@ -160,7 +167,7 @@ var TSOS;
             var output = isSwapped ? [] : '';
             var currBlock;
             var currPointer = this.keyObjectToString(dirBlock.pointerBits);
-            while (currPointer != "0:0:0") {
+            while (currPointer != "F:F:F") {
                 currBlock = this.read(currPointer);
                 // Program hex should not be translated
                 /** if current pointer isn't swapped,
@@ -173,7 +180,7 @@ var TSOS;
                 else {
                     output = output.concat(currBlock.data);
                 }
-                currPointer = this.keyObjectToString(currBlock.pointer);
+                currPointer = this.keyObjectToString(currBlock.pointerBits);
             }
             /** if is swapped and output is of type object,
              * loop through output and get rid of extra 00s
@@ -214,7 +221,7 @@ var TSOS;
             while (currPointer != "F:F:F") {
                 currBlock = this.read(currPointer);
                 this.delete(currPointer);
-                currPointer = this.keyObjectToString(currBlock.pointer);
+                currPointer = this.keyObjectToString(currBlock.pointerBits);
             }
             var keys = this.findFreeSpace(Object.keys(dataPieces).length, this.fileData);
             var freeBlocks = keys.map(key => this.read(key));
@@ -263,7 +270,7 @@ var TSOS;
             while (currPointer != "F:F:F") {
                 currBlock = this.read(currPointer);
                 this.delete(currPointer);
-                currPointer = this.keyObjectToString(currBlock.pointer);
+                currPointer = this.keyObjectToString(currBlock.pointerBits);
             }
             return { status: 0, msg: `File '${target}' successfully deleted` };
         }
@@ -300,8 +307,9 @@ var TSOS;
                  * read into block
                  * skip previously initialized blocks
                 ***/
-                for (var t = key.t; t <= keyLimit.t; t++) {
-                    for (var s = key.s; s <= keyLimit.s; s++) {
+                trackLoop: for (var t = key.t; t <= keyLimit.t; t++) {
+                    sectorLoop: for (var s = key.s; s <= keyLimit.s; s++) {
+                        blockLoop: 
                         // Ternary to skip MBR
                         for (var b = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
                             var block = this.read({ t, s, b });
@@ -319,7 +327,7 @@ var TSOS;
                 }
                 return { status: 0, msg: "Hard drive quickly formatted" };
             }
-            else if (flags.includes('full') || flags.length == 0) { // No flags, assume full format
+            else if (flags.includes('full') || flags.length == 0) {
                 _Disk.init();
                 this.isFormatted = true;
                 var processes = _ResidentList.filter(proc => proc.storageLocation == 'hdd' && proc.state != 'terminated');
@@ -345,8 +353,9 @@ var TSOS;
             ***/
             trackLoop: for (var t = key.t; t <= keyLimit.t; t++) {
                 sectorLoop: for (var s = key.s; s <= keyLimit.s; s++) {
-                    blockLoop: // Ternary to skip MBR
-                     for (var b = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
+                    blockLoop: 
+                    // Ternary to skip MBR
+                    for (var b = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
                         var block = this.read({ t, s, b });
                         if (!block.availabilityBit) {
                             freeKeys.push(this.keyObjectToString({ t, s, b }));
@@ -407,8 +416,9 @@ var TSOS;
              * read into block
              * check if it lines up with search
             ***/
-            for (var t = key.t; t <= keyLimit.t; t++) {
-                for (var s = key.s; s <= keyLimit.s; s++) {
+            trackLoop: for (var t = key.t; t <= keyLimit.t; t++) {
+                sectorLoop: for (var s = key.s; s <= keyLimit.s; s++) {
+                    blockLoop: 
                     // Ternary to skip MBR
                     for (var b = (t == 0 && s == 0) ? key.b : 0; b <= keyLimit.b; b++) {
                         var block = this.read({ t, s, b });

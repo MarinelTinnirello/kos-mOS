@@ -10,7 +10,7 @@ var TSOS;
 (function (TSOS) {
     class Disk {
         constructor(trackNum = 4, // number of tracks
-        sectorNum = 4, // number of sectors
+        sectorNum = 8, // number of sectors
         blockNum = 8, // number of blocks
         dataHeader = 4, // size of the data's header
         dataSize = 60) {
@@ -39,6 +39,7 @@ var TSOS;
             // builds an initial data set for the disk
             var availabilityBit = '0';
             // we want some initialization char, either 0 or F makes the most sense, but we could also do ~
+            // I like ~ :)
             var pointerBits = ['F', 'F', 'F'];
             var data = Array(this.dataSize).fill("00");
             data = pointerBits.concat(data);

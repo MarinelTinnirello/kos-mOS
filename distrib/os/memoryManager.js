@@ -19,7 +19,7 @@ var TSOS;
         }
         init() {
             /*** loops through number of memory segments to assign availibility and register attributes ***/
-            for (var i = 0; i < MEMORY_SIZE / NUM_OF_SEGMENTS; i++) {
+            for (var i = 0; i < (MEMORY_SIZE * NUM_OF_SEGMENTS) / MEMORY_SIZE; i++) {
                 this.isAvailable[i] = true;
                 this.registers[i] = { index: i,
                     base: MEMORY_SIZE * i,
@@ -99,6 +99,7 @@ var TSOS;
             if (status.status) {
                 return _StdOut.putText(status.msg);
             }
+            pcb.location = "hdd";
         }
         rollIn(pcb) {
             var segment;
@@ -119,7 +120,7 @@ var TSOS;
              * load into current free segment
             ***/
             for (var i = 0; i < program.length; i++) {
-                status = _MemoryAccessor.write(this.registers[segment], i, segment);
+                status = _MemoryAccessor.write(this.registers[segment], i, program[i]);
                 /** if outside limit,
                  * terminate program
                 **/
@@ -132,6 +133,7 @@ var TSOS;
             pcb.segment = this.registers[segment];
             // delete temp swap file, update location
             _krnDiskDriver.deleteFile(pcb.swapFile, true);
+            pcb.swapFile = '';
             pcb.location = 'memory';
             return;
         }
@@ -145,9 +147,9 @@ var TSOS;
             }
             this.isAvailable[pcb.segment.index] = true;
             // update PCB info
-            pcb.swapFile = `@${pcb.pid}`;
             pcb.location = 'hdd';
             pcb.segment = {};
+            pcb.swapFile = `@${pcb.pid}`;
             // create temp swap file, write program
             _krnDiskDriver.create(pcb.swapFile, true);
             _krnDiskDriver.writeFile(pcb.swapFile, programs, true);

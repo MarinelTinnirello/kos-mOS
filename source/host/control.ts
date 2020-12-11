@@ -152,6 +152,7 @@ module TSOS {
                 /*** loop through cells in the row ***/
                 for (var j = 0; j < 8; j++) {
                     cell = row.insertCell(-1);
+
                     cell.innerHTML = memory[p_addr].toLocaleUpperCase();
 
                     /** highlights current address and op codes
@@ -259,7 +260,7 @@ module TSOS {
                 var tRow = document.createElement("tr");
                 tRow.setAttribute('id', 'tempRow');
                 
-                for (var j = 0; j < 8; j++) {
+                for (var j = 0; j < 9; j++) {
                     var tCell = document.createElement("td");
                     tRow.appendChild(tCell);
                 }
@@ -272,6 +273,7 @@ module TSOS {
                 tRow.cells[5].innerHTML = _ResidentList[i].Zflag.toString(16);
                 tRow.cells[6].innerHTML = _ResidentList[i].priority;
                 tRow.cells[7].innerHTML = _ResidentList[i].state.toLocaleUpperCase();
+                tRow.cells[8].innerHTML = _ResidentList[i].location.toLocaleUpperCase();
 
                 table.appendChild(tRow);
             }
@@ -302,6 +304,7 @@ module TSOS {
                        // insert availability bit
                        row.insertCell(-1).innerHTML = block[0];
                        // insert pointer bits
+                       pointer = block.substring(1, 4);
                        row.insertCell(-1).innerHTML = `${pointer[0]}:${pointer[1]}:${pointer[2]}`;
                        // insert data
                        row.insertCell(-1).innerHTML = block.substring(4);

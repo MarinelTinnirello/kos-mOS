@@ -69,7 +69,7 @@ var TSOS;
                      * then roll out process
                     **/
                     if (segment === undefined) {
-                        var processInMemory = _ResidentList.filter(process => {
+                        var processInMemory = _ResidentList.filter((process) => {
                             return process.location == "memory" &&
                                 (process.state == "ready" || process.state == "process");
                         });

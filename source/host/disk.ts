@@ -12,7 +12,7 @@ module TSOS {
     export class Disk {
 
         constructor(public trackNum: number = 4,        // number of tracks
-                    public sectorNum: number = 4,       // number of sectors
+                    public sectorNum: number = 8,       // number of sectors
                     public blockNum: number = 8,        // number of blocks
                     public dataHeader: number = 4,      // size of the data's header
                     public dataSize: number = 60) {     // size of the rest of the data
@@ -40,6 +40,7 @@ module TSOS {
             // builds an initial data set for the disk
             var availabilityBit = '0';
             // we want some initialization char, either 0 or F makes the most sense, but we could also do ~
+            // I like ~ :)
             var pointerBits = ['F', 'F', 'F'];
             var data = Array(this.dataSize).fill("00");
 

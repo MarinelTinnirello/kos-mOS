@@ -189,6 +189,8 @@ module TSOS {
                     break;
                 case FILE_SYSTEM_IRQ:
                     _krnDiskDriver.isr(params);        // Kernel mode device driver
+                    _StdOut.advanceLine();
+                    _OsShell.putPrompt();
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");

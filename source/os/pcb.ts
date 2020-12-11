@@ -29,7 +29,7 @@ module TSOS {
                     public Zflag: number = 0,           // Z flag
                     public waitCycles: number = 0,      // how many cycles it had to wait
                     public executeCycles: number = 0,   // how many cycles it had to execute
-                    public segment = {},                // segment object
+                    public segment: any = {},           // segment object
                     public state: string = "new",       // state of process
                     public location: string = "memory", // location of process
                     public swapFile: string = '') {     // swap file's value
