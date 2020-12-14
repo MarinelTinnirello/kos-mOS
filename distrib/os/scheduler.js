@@ -88,6 +88,7 @@ var TSOS;
         terminateCurrProcess(currProcess) {
             currProcess.state = "terminated";
             _ReadyQueue = _ReadyQueue.filter(val => val.pid != currProcess.pid);
+            console.log("Terminated", _ReadyQueue.length);
             _MemoryManager.isAvailable[currProcess.segment.index] = true;
             /** check if current process's location is in hard drive **/
             if (currProcess.location == 'hdd') {

@@ -54,10 +54,9 @@ module TSOS {
             }
         }
 
-        public runNextProcess(): void {
+        public runNextProcess() {
             /** check if there's a process currently running **/
-            if (this.currProcess !== null || this.currProcess.pid !== _ReadyQueue[0].pid)
-            {
+            if (this.currProcess !== null || this.currProcess.pid !== _ReadyQueue[0].pid) {
                 /** checks if location of current process is in hard drive **/
                 if (_ReadyQueue[0].location == "hdd") {
                     var segment;
@@ -93,13 +92,14 @@ module TSOS {
                 // switches context
                 // necessary for all, but as of Project 4, we need to check the location of our process 1st
                 _Kernel.krnTrace("Context switch in progress...");
-                _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH_IRQ, []))
+                _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH_IRQ, []));                
             }
         }
 
         public terminateCurrProcess(currProcess): void {
             currProcess.state = "terminated";
             _ReadyQueue = _ReadyQueue.filter(val => val.pid != currProcess.pid);
+            console.log("Terminated",_ReadyQueue.length);
             _MemoryManager.isAvailable[currProcess.segment.index] = true;
 
             /** check if current process's location is in hard drive **/

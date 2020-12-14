@@ -160,6 +160,10 @@ var TSOS;
         //
         run() {
             // Ready queue already re-ordered, but the current process hasn't been updated yet
+            // really crappy way to control ready queue for going on too long
+            if (_ReadyQueue.length == 0) {
+                return;
+            }
             /*** check if there's a PCB in CPU and if the state hasn't been set to "terminated"
              * if so, then set state to "ready"
             ***/
@@ -178,8 +182,12 @@ var TSOS;
             if (_CPU.Pcb && _CPU.Pcb != "terminated") {
                 _CPU.savePcbState();
                 _Scheduler.terminateCurrProcess(pcb);
-                if (_ReadyQueue.length == 1) {
+                /** Ready Queue still needs to roll in, this just forces it, cause the interrupt hasn't been received yet **/
+                if (_ReadyQueue.length == 0) {
                     _CPU.isExecuting = false;
+                }
+                else {
+                    _Scheduler.runNextProcess();
                 }
             }
         }

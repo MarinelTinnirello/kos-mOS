@@ -167,6 +167,7 @@ var TSOS;
             this.PC++;
         }
         brk() {
+            console.log("BRK");
             this.savePcbState();
             this.isExecuting = false;
             _KernelInterruptQueue.enqueue(new TSOS.Interrupt(KILL_PROCESS_IRQ, this.Pcb.pid));
