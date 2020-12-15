@@ -71,28 +71,9 @@ module TSOS {
                     break;
             }
 
-            //document.getElementById("taProgramInput").value = opCodes;
-            var input = document.getElementById("taProgramInput");
+            var input = document.getElementById("taProgramInput") as HTMLTextAreaElement;
             
-            input.nodeValue = opCodes;
-        }
-
-        public static dropDown(btn): void {
-            document.getElementById("dropdown-menu").classList.toggle("show");
-            
-            // window.onclick = function(event) {
-            //     if (!event.target.matches('.dropbtn')) {
-            //         var dropdowns = document.getElementsByClassName("dropdown-content");
-
-            //         for (var i = 0; i < dropdowns.length; i++) {
-            //             var openDropdown = dropdowns[i];
-
-            //             if (openDropdown.classList.contains('show')) {
-            //                 openDropdown.classList.remove('show');
-            //             }
-            //         }
-            //     }
-            // }
+            input.value = opCodes;
         }
     }
 }

@@ -43,6 +43,9 @@
    <!-- Materialize.js Library for formatting -->
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+   <!-- JQuery Library for formatting and to fix Materialize.js -->
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
    
 </head>
 
@@ -53,7 +56,7 @@
    <div class="containter">
 
       <div class="row">
-         <div class="col s3">
+         <div class="col s4">
 
             <div id="divLog">
                <label class="center-align">
@@ -67,27 +70,25 @@
                </label>
             </div>
 
-            <!-- <select id="btnPrograms">
-               <option onclick="TSOS.Utils.insertProgram(0)">counting0counting1hello worldcounting2</option>
-               <option onclick="TSOS.Utils.insertProgram(1)">12DONE</option>
-               <option onclick="TSOS.Utils.insertProgram(2)">ab00a1b1ab22adone</option>
-               <option onclick="TSOS.Utils.insertProgram(3)">b3b4b5bdone</option>
-               <option onclick="TSOS.Utils.insertProgram(4)">a is now 2 a is now 3 this works right</option>
-               <option onclick="TSOS.Utils.insertProgram(5)">aint 5 true</option>
-               <option onclick="TSOS.Utils.insertProgram(6)">spoiler: KOS-MOS is actual Mary</option>
-             </select> -->
-             <!-- <div class="dropdown">
-               <button type="button" onclick="TSOS.Utils.dropDown(btn)" class="btn">Programs</button>
-               <ul id="dropdown-menu" class="dropdown-content">
-                 <li><a onclick="TSOS.Utils.insertProgram(0)">counting0counting1hello worldcounting2</a></li>
-                 <li><a onclick="TSOS.Utils.insertProgram(1)">12DONE</a></li>
-                 <li><a onclick="TSOS.Utils.insertProgram(2)">ab00a1b1ab22adone</a></li>
-                 <li><a onclick="TSOS.Utils.insertProgram(3)">b3b4b5bdone</a></li>
-                 <li><a onclick="TSOS.Utils.insertProgram(4)">a is now 2 a is now 3 this works right</a></li>
-                 <li><a onclick="TSOS.Utils.insertProgram(5)">aint 5 true</a></li>
-                 <li><a onclick="TSOS.Utils.insertProgram(6)">spoiler: KOS-MOS is actual Mary</a></li>
-               </ul>
-             </div> -->
+            <div class="divTestPrograms">
+               <!-- Don't mind this here, it's meant to be a shit fix for Materialize.js -->
+               <script>
+                  $(document).ready(function(){
+                  $('select').formSelect();
+               });
+               </script>
+               <!-- Requires "brower-default" to actually show up -->
+               <select id="btnPrograms" class="browser-default">
+                  <option disabled selected>Choose your program</option>
+                  <option onclick="TSOS.Utils.insertProgramIntoInput(0)">counting0counting1hello worldcounting2</option>
+                  <option onclick="TSOS.Utils.insertProgramIntoInput(1)">12DONE</option>
+                  <option onclick="TSOS.Utils.insertProgramIntoInput(2)">ab00a1b1ab22adone</option>
+                  <option onclick="TSOS.Utils.insertProgramIntoInput(3)">b3b4b5bdone</option>
+                  <option onclick="TSOS.Utils.insertProgramIntoInput(4)">a is now 2 a is now 3 this works right</option>
+                  <option onclick="TSOS.Utils.insertProgramIntoInput(5)">aint 5 true</option>
+                  <option onclick="TSOS.Utils.insertProgramIntoInput(6)">spoiler: KOS-MOS is actual Mary</option>
+               </select>
+            </div>
 
             <div id="divUserProgramInput">
                <label class="center-align">
@@ -126,7 +127,7 @@
 
          </div>
 
-         <div class="col s6">
+         <div class="col s4">
             
             <div id="divButtonBar">
                <input type="button"
@@ -190,7 +191,7 @@
 
          </div>
 
-         <div class="col s3">
+         <div class="col s4">
 
             <div id="divCpu">
                <div id="displayCpu">

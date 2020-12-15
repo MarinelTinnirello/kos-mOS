@@ -69,21 +69,7 @@ var TSOS;
             }
             //document.getElementById("taProgramInput").value = opCodes;
             var input = document.getElementById("taProgramInput");
-            input.nodeValue = opCodes;
-        }
-        static dropDown(btn) {
-            document.getElementById("dropdown-menu").classList.toggle("show");
-            // window.onclick = function(event) {
-            //     if (!event.target.matches('.dropbtn')) {
-            //         var dropdowns = document.getElementsByClassName("dropdown-content");
-            //         for (var i = 0; i < dropdowns.length; i++) {
-            //             var openDropdown = dropdowns[i];
-            //             if (openDropdown.classList.contains('show')) {
-            //                 openDropdown.classList.remove('show');
-            //             }
-            //         }
-            //     }
-            // }
+            input.value = opCodes;
         }
     }
     TSOS.Utils = Utils;
